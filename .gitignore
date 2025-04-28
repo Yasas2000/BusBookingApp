@@ -1,0 +1,24 @@
+# Ignore Node modules (both FE and BE)
+**/node_modules/
+
+# Ignore build/dist folders
+**/dist/
+**/build/
+
+# Environment files
+**/.env
+
+# Logs
+*.log
+
+# macOS system file
+.DS_Store
+
+# npm/Yarn debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VS Code settings (if using VS Code)
+.vscode/
+
