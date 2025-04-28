@@ -21,7 +21,7 @@ const cors = require('cors');
 
 // Example of setting CORS
 app.use(cors({
-    origin: "http://localhost:3000",  // Allow frontend domain
+    origin: "http://localhost:5000",  // Allow frontend domain
     credentials: true                 // Allow cookies to be sent
 }));
 
@@ -36,6 +36,7 @@ app.use('/bus',busRoutes)
 app.use('/trip',tripRoutes)
 console.log("BACKEND SERVER STARTED");
 
-app.listen(3000, () => {
-    console.log(`Server Started at ${3000}`)
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server Started at ${port}`)
 })
