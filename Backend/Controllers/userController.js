@@ -15,32 +15,37 @@ exports.registerUser = async (req,res) =>{
     res.json({message:"User Registered"})
 }
 
-exports.loginUser = async (req,res) => {
-    try {const {email, password} = req.body;
-    const user = await User.findOne({email});
-
-    if(!user || !(await bycrypt.compare(password,user.password))) {
-        return res.status(401).json({message:"Invalid Email or Credintials"});
+exports.loginUser = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+  
+      if (!user || !(await bycrypt.compare(password, user.password))) {
+        return res.status(401).json({ message: "Invalid Email or Credentials" });
+      }
+  
+      const payload = {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+      };
+  
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+      const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7d' });
+  
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+  
+      res.json({ accessToken });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
-    const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7d' });
-
-    // Store refresh token in an HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true, // Prevent access by JavaScript
-        secure: false,  // Ensure cookies are only sent over HTTPS
-        sameSite: "Strict", // Prevent CSRF attacks
-        maxAge: 7 * 24 * 60 * 60 * 1000 // Set cookie expiry (7 days)
-    });
-
-    res.json({accessToken})
-    }catch(error){
-        console.log(error)
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-
-}
+  };
 
 exports.refreshToken = async(req,res)=>{
     const refreshToken = req.cookies.refreshToken;
@@ -53,4 +58,22 @@ exports.refreshToken = async(req,res)=>{
         const newAccessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
         res.json({ accessToken: newAccessToken });
     });
+};
+
+exports.getUserByEmail = async (req, res) => {
+    try {
+        const {email} = req.query;
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const user  = await User.findOne({email});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({user});
+    } catch (error) {
+        
+    }
 }

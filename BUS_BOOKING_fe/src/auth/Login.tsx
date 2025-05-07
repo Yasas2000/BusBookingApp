@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { setAuthDetails } from "src/auth/AuthUtils";
+import { useNavigate} from 'react-router-dom';
 
 export default function Login() {
+	const navigate = useNavigate();
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
 
 	const login = async (event: React.FormEvent) => {
-    event.preventDefault();
+    	event.preventDefault();
 
 		try {
-			const { data } = await axios.post("/auth/login", {
-				email,
-				password,
-			});
+			const { data } = await axios.post("/user/login", {email,password});
+			await setAuthDetails(data);
+
+			navigate('/dashboard');
 		} catch (error) {
 			console.log("error in login");
 		}
@@ -35,6 +38,7 @@ export default function Login() {
 						type="email"
 						onChange={(event) => {setEmail(event.target.value)}}
 						placeholder="Enter email"
+						autoComplete="username"
 						required
 					/>
 				</div>
@@ -48,6 +52,7 @@ export default function Login() {
 						type="password"
 						onChange={(event) => {setPassword(event.target.value)}}
 						placeholder="Enter password"
+						autoComplete="current-password"
 						required
 					/>
 				</div>
