@@ -16,7 +16,6 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route path="dashboard" element={<div>Dashboard Content</div>} />
             <Route path="profile" element={<div>Profile Page</div>} />
-            <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
         </Route>
 
