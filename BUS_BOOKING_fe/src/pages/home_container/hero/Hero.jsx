@@ -18,12 +18,12 @@ const Hero = () => {
     return (
         <div className='w-full h-[calc(100vh-8ch)] lg:ps-28 md:ps-16 sm:ps-7 ps-4 mt-[8ch] flex items-center justify-center flex-col hero relative'>
             <div className='flex-1 w-full flex items-stretch justify-between gap-12 pb-10'>
-                <motion.dev className="w-[35%] h-auto rounded-md flex justify-center flex-col space-y-14"
+                <motion.div className="w-[35%] h-auto rounded-md flex justify-center flex-col space-y-14"
                 initial={{opacity: 0, y: -10}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.5, ease: 'linear', delay: 0.2}}>
                 
-                <motion.dev className='space-y-5'
+                <motion.div className='space-y-5'
                     initial={{opacity: 0, y: -10}}
                     animate={{opacity: 1, y: 0}}
                     transition={{duration: 1, ease: 'linear', delay: 0.2}}>
@@ -40,11 +40,11 @@ const Hero = () => {
                         transition={{duration: 2, ease: 'linear', delay: 0.6}}>
                         Find and book your bus Tickets with a few clicks. We offer a wide range of bus services to suit your travel needs.
                     </motion.p>
-                </motion.dev>
+                </motion.div>
                 <motion.button className="w-fit bg-violet-700 hover:bg-violet-800 text-neutral-50 font-medium py-3 px-6 rounded-md ease-in-out duration-300">
                     Reserve Seat Now
                 </motion.button>
-                </motion.dev>
+                </motion.div>
                 <div className="w-[70%] h-full rounded-md flex items-end justify-end absolute top-0 -right-48">
                     <motion.img src={Bus2} alt="bus" className="w-full h-full object-contain"
                         initial="initial"

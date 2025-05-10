@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 interface JWTPayload {
     userId: string;
     name: string;
@@ -16,7 +14,10 @@ const decodeJWTToken = (token: string): JWTPayload => {
 
 const setAuthDetails = (loginResponse: any) => {
     if (loginResponse?.accessToken) {
-        localStorage.setItem("access_token", loginResponse.accessToken )
+        localStorage.setItem("access_token", loginResponse.accessToken);
+    }
+    if (loginResponse?.refreshToken) {
+        localStorage.setItem("refresh_token", loginResponse.refreshToken);
     }
 };
 
@@ -26,6 +27,29 @@ const removeAuthDetails = () => {
         return;
     }
     localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+}
+
+const checkTokenExpiration = (): boolean => {
+    const { exp } = getTokenPayload();
+    const expiresInMs = exp * 1000;
+    const currentTime = Date.now();
+
+    if (expiresInMs < currentTime) {
+        return true;
+    }
+
+    return false;
+}   
+
+const getTokenPayload = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        throw new Error("No access token found");
+    }
+
+    const decodedPayload: JWTPayload = decodeJWTToken(token);
+    return decodedPayload;
 }
 
 const getUserEmailFromToken = () => {
@@ -38,4 +62,4 @@ const getUserEmailFromToken = () => {
         return decodedPayload.email;
     }
 
-export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails};
+export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails, checkTokenExpiration};

@@ -40,25 +40,48 @@ exports.loginUser = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
   
-      res.json({ accessToken });
+      res.json({ accessToken, refreshToken });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
 
-exports.refreshToken = async(req,res)=>{
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return res.status(401).json({ message: "No refresh token found" });
-
-    jwt.verify(refreshToken, process.env.REFRESH_SECRET, (err, decoded) => {
-        if (err) return res.status(403).json({ message: "Invalid refresh token" });
-
-        // Generate a new access token
-        const newAccessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
-        res.json({ accessToken: newAccessToken });
-    });
-};
+  exports.refreshToken = async (req, res) => {
+    try {
+      // Get refresh token from body
+      const refreshToken = req.body.refreshToken;
+      if (!refreshToken) return res.status(401).json({ message: "No refresh token found" });
+  
+      // Verify refresh token
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+      
+      // Fetch user data from database
+      const user = await User.findById(decoded.userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      // Create full payload with user data
+      const payload = {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+      };
+  
+      // Generate new access token with full payload
+      const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+      res.json({ accessToken: newAccessToken });
+  
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        res.status(403).json({ message: "Refresh token expired" });
+      } else if (error.name === 'JsonWebTokenError') {
+        res.status(403).json({ message: "Invalid refresh token" });
+      } else {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    }
+  };
 
 exports.getUserByEmail = async (req, res) => {
     try {

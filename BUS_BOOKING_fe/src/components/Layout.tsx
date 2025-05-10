@@ -1,14 +1,14 @@
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import Navbar from "./navbar/Navbar";
+import Footer from "./footer/Footer";
 
 export default function Layout() {
 
-    const navigate = useNavigate();
     return (
         <div>
-            <div>NAV BAR</div>
-            <button className="border border-black mr-10" onClick={() => navigate("/profile")}>go to prtofile</button>
-            <button onClick={() => navigate("/dashboard")}>go to dashboard</button>
+            <Navbar />
             <div> <Outlet/></div>
+            <Footer />
         </div>
     );
 }

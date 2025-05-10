@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/refresh",refreshToken)
+router.post("/refresh",refreshToken)
 router.get("/whoami", getUserByEmail)
 
 module.exports = router;
