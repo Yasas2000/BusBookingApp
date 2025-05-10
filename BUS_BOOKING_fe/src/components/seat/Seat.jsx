@@ -1,144 +1,207 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { MdOutlineChair } from "react-icons/md";
 import { GiSteeringWheel } from "react-icons/gi";
 import { RiMoneyRupeeCircleLine } from "react-icons/ri";
 
-const Seat = ({ seatNumber, isSelected, onClick }) => {
-  return (
+const seatLayouts = {
+  40: [
+    [null, null, null, null, 1, 2],
+    [3, 4, null, null, 5, 6],
+    [7, 8, null, null, 9, 10],
+    [11, 12, null, null, 13, 14],
+    [15, 16, null, null, 17, 18],
+    [19, 20, null, null, 21, 22],
+    [23, 24, null, null, 25, 26],
+    [27, 28, null, null, 29, 30],
+    [31, 32, null, null, 33, 34],
+    [35, 36, 37, 38, 39, 40]
+  ],
+  48: [
+    [null, null, null, null, 1, 2],
+    [3, 4, null, null, 5, 6],
+    [7, 8, null, null, 9, 10],
+    [11, 12, null, null, 13, 14],
+    [15, 16, null, null, 17, 18],
+    [19, 20, null, null, 21, 22],
+    [23, 24, null, null, 25, 26],
+    [27, 28, null, null, 29, 30],
+    [31, 32, null, null, 33, 34],
+    [35, 36, null, null, 37, 38],
+    [39, 40, null, null, 41, 42],
+    [43, 44, 45, 46, 47, 48]
+  ],
+  56: [
+    [null, null, null, null, 1, 2],
+    [3, 4, null, null, 5, 6],
+    [7, 8, null, null, 9, 10],
+    [11, 12, null, null, 13, 14],
+    [15, 16, null, null, 17, 18],
+    [19, 20, null, null, 21, 22],
+    [23, 24, null, null, 25, 26],
+    [27, 28, null, null, 29, 30],
+    [31, 32, null, null, 33, 34],
+    [35, 36, null, null, 37, 38],
+    [39, 40, null, null, 41, 42],
+    [43, 44, null, null, 45, 46],
+    [47, 48, null, null, 49, 50],
+    [51, 52, 53, 54, 55, 56]
+  ],
+};
+
+const Seat = ({ seatNumber, isSelected, isBooked, onClick }) => {
+  let colorClass = "text-neutral-600";
+  if (isBooked) colorClass = "text-red-500";
+  else if (isSelected) colorClass = "text-violet-600";
+
+  return seatNumber ? (
     <MdOutlineChair
-      className={`text-3xl -rotate-90 cursor-pointer ${
-        isSelected ? "text-violet-600" : "text-neutral-600"
-      }`}
+      className={`text-2xl sm:text-3xl -rotate-90 ${
+        isBooked ? "cursor-not-allowed" : "cursor-pointer"
+      } ${colorClass}`}
       onClick={onClick}
     />
+  ) : (
+    <div></div> // Placeholder for aisle
   );
 };
 
-const BusSeatLayout = () => {
-  const totalSeats = 41;
+const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) => {
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [bookedSeats, setBookedSeats] = useState([]);
+
+  useEffect(() => {
+    const fetchBookedSeats = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/booking/booked-seats/${tripId}/${tripDate}`
+        );
+        setBookedSeats(res.data.map(Number));
+      } catch (err) {
+        console.error("Error loading booked seats:", err);
+      }
+    };
+
+    fetchBookedSeats();
+  }, [tripId, tripDate]);
 
   const handleSeatClick = (seatNumber) => {
+    let newSelectedSeats;
     if (selectedSeats.includes(seatNumber)) {
-      setSelectedSeats(selectedSeats.filter((seat) => seat !== seatNumber));
+      newSelectedSeats = selectedSeats.filter((seat) => seat !== seatNumber);
     } else {
       if (selectedSeats.length < 10) {
-        setSelectedSeats([...selectedSeats, seatNumber]);
+        newSelectedSeats = [...selectedSeats, seatNumber];
       } else {
         alert("You can only select up to 10 seats.");
+        return;
       }
     }
+    
+    setSelectedSeats(newSelectedSeats);
+    // Pass the selected seats to the parent component
+    if (onSeatSelect) {
+      onSeatSelect(newSelectedSeats);
+    }
   };
 
-  const renderSeats = () => {
-    let seats = [];
-    for (let i = 1; i <= totalSeats; i++) {
-      seats.push(
-        <Seat
-          key={i}
-          seatNumber={i}
-          isSelected={selectedSeats.includes(i)}
-          onClick={() => handleSeatClick(i)}
-        />
-      );
-    }
-    return seats;
-  };
+  const layout = seatLayouts[capacity] || [];
 
   return (
-    <div className="space-y-5 p-4">
-      <h2 className="text-xl text-neutral-800 dark:text-neutral-100 font-medium">
+    <div className="space-y-5 p-2 sm:p-4">
+      <h2 className="text-lg sm:text-xl text-neutral-800 dark:text-neutral-100 font-medium">
         Choose a Seat
       </h2>
 
-      {/* Seat layout grid */}
-      <div className="w-full flex flex-col lg:flex-row justify-between gap-8">
-        {/* Seats and steering wheel */}
-        <div className="flex-1 w-full flex flex-col sm:flex-row gap-5">
-          <div className="w-full sm:w-auto border-r-2 border-dashed border-neutral-300 dark:border-neutral-800 flex justify-center">
-            <GiSteeringWheel className="text-4xl mt-6 text-violet-600 -rotate-90" />
-          </div>
+      <div className="w-full flex flex-row lg:flex-row justify-center gap-8 sm:gap-8">
+        {/* Seat layout section - with overflow handling for small screens */}
+        <div className="w-auto">
+          {/* Scrollable container for small screens */}
+          <div className="overflow-x-auto pb-4">
+            <div className="mx-auto"> {/* Minimum width to prevent squishing */}
+              {/* Dashed line with steering wheel aligned right */}
+              <div className="w-max">
+                <div className="flex w-full items-start justify-between border-b-2 border-dashed border-neutral-300 dark:border-neutral-800">
+                  {/* Empty div to push wheel to the right */}
+                  <div></div>
+                  <GiSteeringWheel className="text-3xl sm:text-4xl text-violet-600 mr-1" />
+                </div>
 
-          {/* Seats */}
-          <div className="flex flex-col items-center w-full">
-            <div className="flex-1 space-y-4 w-full">
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                {renderSeats().slice(0, 10)}
-              </div>
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                {renderSeats().slice(10, 20)}
-              </div>
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                {renderSeats().slice(20, 21)}
-              </div>
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                {renderSeats().slice(21, 31)}
-              </div>
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-                {renderSeats().slice(31, 41)}
+                {/* Seat layout */}
+                <div className="space-y-2 sm:space-y-3 w-full mt-4">
+                  {layout.map((row, rowIndex) => (
+                    <div
+                      key={rowIndex}
+                      className="grid grid-cols-6 gap-2 sm:gap-3 justify-center" // Reduced gap on small screens
+                    >
+                      {row.map((seatNumber, colIndex) => (
+                        <Seat
+                          key={`${rowIndex}-${colIndex}`}
+                          seatNumber={seatNumber}
+                          isSelected={selectedSeats.includes(seatNumber)}
+                          isBooked={bookedSeats.includes(seatNumber)}
+                          onClick={() =>
+                            seatNumber && !bookedSeats.includes(seatNumber)
+                              ? handleSeatClick(seatNumber)
+                              : null
+                          }
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Instructions and price */}
-        <div className="space-y-3 w-full sm:w-40">
+        {/* Legend - horizontal on mobile, vertical on larger screens */}
+        <div className="flex flex-col lg:flex-col flex-wrap gap-4 sm:gap-3 justify-start lg:justify-start lg:w-40">
           <div className="flex items-center gap-x-2">
             <MdOutlineChair className="text-lg text-neutral-500 -rotate-90" />
-            <p className="text-neutral-900 dark:text-neutral-200 text-sm font-normal">
-              Available
-            </p>
+            <p className="text-xs sm:text-sm">Available</p>
           </div>
           <div className="flex items-center gap-x-2">
             <MdOutlineChair className="text-lg text-red-500 -rotate-90" />
-            <p className="text-neutral-900 dark:text-neutral-200 text-sm font-normal">
-              Booked
-            </p>
+            <p className="text-xs sm:text-sm">Booked</p>
           </div>
           <div className="flex items-center gap-x-2">
             <MdOutlineChair className="text-lg text-violet-500 -rotate-90" />
-            <p className="text-neutral-900 dark:text-neutral-200 text-sm font-normal">
-              Selected
-            </p>
+            <p className="text-xs sm:text-sm">Selected</p>
           </div>
           <div className="flex items-center gap-x-2">
             <RiMoneyRupeeCircleLine className="text-lg text-neutral-500" />
-            <p className="text-neutral-900 dark:text-neutral-200 text-sm font-normal">
-              Rs.750
-            </p>
+            <p className="text-xs sm:text-sm">Rs. {fare}</p>
           </div>
         </div>
       </div>
 
-      {/* Selected seats */}
       {selectedSeats.length > 0 && (
-        <div className="!mt-10">
-          <h3 className="text-lg font-bold">Selected seats</h3>
-          <div className="flex flex-wrap">
-            {selectedSeats.map((seat) => (
-              <div
-                key={seat}
-                className="w-10 h-10 rounded-md m-1.5 text-lg font-medium bg-violet-600/30 flex items-center justify-center"
-              >
-                {seat}
-              </div>
-            ))}
+        <>
+          <div className="!mt-6 sm:!mt-10">
+            <h3 className="text-base sm:text-lg font-bold">Selected seats</h3>
+            <div className="flex flex-wrap">
+              {selectedSeats.map((seat) => (
+                <div
+                  key={seat}
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-md m-1 sm:m-1.5 text-sm sm:text-lg font-medium bg-violet-600/30 flex items-center justify-center"
+                >
+                  {seat}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Total price */}
-      {selectedSeats.length > 0 && (
-        <div className="!mt-5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-          <h3 className="text-lg font-bold">Total Fair Price</h3>
-          <p className="text-lg font-medium">
-            Rs. {selectedSeats.length * 750}
-          </p>
-          <span className="text-sm text-neutral-400 dark:text-neutral-600 font-normal">
-            (Including all taxes)
-          </span>
-        </div>
+          <div className="!mt-4 sm:!mt-5 flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4">
+            <h3 className="text-base sm:text-lg font-bold">Total Fare Price</h3>
+            <p className="text-base sm:text-lg font-medium">
+              Rs. {selectedSeats.length * fare}
+            </p>
+            <span className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-600 font-normal">
+              (Including all taxes)
+            </span>
+          </div>
+        </>
       )}
     </div>
   );

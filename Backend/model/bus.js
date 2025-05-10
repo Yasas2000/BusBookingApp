@@ -17,6 +17,10 @@ const BusSchema = new mongoose.Schema({
         require:true,
         type:Number
     },
+    fare:{
+        require:true,
+        type:Number
+    },
     operator_id:String
 });
 

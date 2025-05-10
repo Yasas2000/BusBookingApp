@@ -1,30 +1,88 @@
-import React from "react";
-
+import React, {useState} from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
 import Bus from "../../assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import Destination from "../../components/destination/Destination";
-import DepartTime from "../../components/departTime/DepartTime";
 import BusSeatLayout from "../../components/seat/Seat";
+import axios from "axios";
+
+const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 
 const Details = () => {
+  const { state: trip } = useLocation();
+  const navigate = useNavigate();
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [isBooking, setIsBooking] = useState(false);
+
+  const handleBooking = async () => {
+    if (selectedSeats.length === 0) {
+      alert("Please select at least one seat");
+      return;
+    }
+    
+    setIsBooking(true);
+    
+    try {
+      // Assuming you have user authentication and can get the user ID
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2U5MmQ1YjRiZjI2NWU3YjgxY2M3NDciLCJpYXQiOjE3NDY4NjI3ODcsImV4cCI6MTc0Njg2MzY4N30.nvq_bxi6r_Vr02aDoOKaDIbi_sz4qLJ6noAEpH7Tn-s"
+
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
+      const bookingData = {
+        bus_id: trip.bus_id,
+        trip_id: trip.trip_id,
+        departure_date: trip.tripDate,
+        seatNumbers: selectedSeats
+      };
+      
+      const response = await axios.post('http://localhost:3000/booking/book-seat', bookingData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.data) {
+        alert('Booking successful!');
+        navigate('/bookings', { state: { bookingDetails: response.data } });
+      }
+    } catch (error) {
+      console.error('Booking failed:', error);
+      alert('Booking failed. Please try again.');
+      console.log(error);
+    } finally {
+      setIsBooking(false);
+    }
+  };
+  
   return (
-    <div className="w-full lg:px-28 md:px-16 sm:px-7 px-4 my-[10ch]">
-      <div className="w-full grid grid-cols-2 gap-16 items-center">
-        <div className="col-span-1 space-y-8">
-          <img
-            src={Bus}
-            alt="Bus Image"
-            className="w-full aspect-[3/2] rounded-md object-contained"
-          />
+    <div className="w-full px-4 sm:px-7 md:px-16 lg:px-28 my-8 md:my-[10ch]">
+      {/* Main content grid - changes to single column on mobile */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
+        {/* Bus image and details section */}
+        <div className="space-y-6 md:space-y-8">
+          {/* Image container with proper aspect ratio and centering */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md lg:max-w-none">
+              <img
+                src={Bus}
+                alt="Bus Image"
+                className="w-full rounded-md object-contain h-auto"
+              />
+            </div>
+          </div>
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-neutral-900 dark:text-neutral-50">
+            <h1 className="text-2xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-50">
               Luxury Bus
-              <span className="text-base font-normal text-neutral-400 dark:text-neutral-500 ml-3">
+              <span className="block md:inline text-sm md:text-base font-normal text-neutral-400 dark:text-neutral-500 md:ml-3">
                 (Bus Number Plate Number)
               </span>
             </h1>
-            <div className="fle items-center gap-x-2">
+            <div className="flex items-center gap-x-2">
               <div className="flex items-center gap-x-1 text-sm text-yellow-500 dark:text-yellow-600">
                 <FaStar />
                 <FaStar />
@@ -42,27 +100,67 @@ const Details = () => {
             </p>
           </div>
         </div>
-        <div className="col-span-1 space-y-10">
-          <div className="space-y-6">
-            {/*Destination card*/}
-            <Destination />
 
-            {/*Departure Card*/}
-            <DepartTime />
+        {/* Trip details and booking section */}
+        <div className="space-y-6 md:space-y-10">
+          <div className="space-y-6">
+            {/* Destination card */}
+            <div className="space-y-3 md:space-y-5">
+              <h1 className="text-xl text-neutral-800 dark:text-neutral-100 font-medium">
+                Your Destination
+              </h1>
+              <div className="w-full flex sm:flex-row items-center gap-y-2 sm:gap-x-3">
+                <div className="w-full sm:w-fit text-base font-semibold">
+                  From:- <span className="ml-1 font-medium">{capitalize(trip.from)}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="w-full h-[1px] border border-dashed-neutral-200 dark:border-neutral-800/80"></div>
+                </div>
+                <div className="w-full sm:w-fit text-base font-semibold">
+                  To:- <span className="ml-1 font-medium">{capitalize(trip.to)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Departure Card */}
+            <div className="space-y-3 md:space-y-5">
+              <div className="w-full flex items-center gap-x-3">
+                <div className="w-fit text-base font-semibold">
+                  Bus Depart at:{" "}
+                  <span className="ml-1 font-medium">{trip.departure}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          {/*Seat Selection*/}
-          <BusSeatLayout />
-          {/*Checkout Btn*/}
-          <div className="flex">
+          
+          {/* Seat Selection */}
+          <div className="overflow-x-auto">
+            <BusSeatLayout
+              tripId={trip.trip_id}
+              tripDate={trip.tripDate}
+              capacity={trip.capacity || 56}
+              fare={trip.fare}
+              onSeatSelect={setSelectedSeats}
+            />
+          </div>
+
+          {/* Checkout Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to={"/details/checkout"}
-              className="w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300"
+              className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"
             >
               Proceed To Checkout
             </Link>
+            <button
+              className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"
+              onClick={handleBooking}
+              disabled={isBooking || selectedSeats.length === 0}
+            >
+              {isBooking ? "Processing..." : "Book Now"}
+            </button>
           </div>
         </div>
-        <div className="col-span-1">kjj</div>
       </div>
     </div>
   );
