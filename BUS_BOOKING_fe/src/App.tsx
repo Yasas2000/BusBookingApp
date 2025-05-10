@@ -13,29 +13,25 @@ import Checkout from './pages/checkout/Checkout';
 
 function App() {
   const isAuthenticated = useSelector((state: RootState) => state.user.authenticated);
+  
   return (
     <BrowserRouter>
       <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-300 flex flex-col overflow-hidden">
-        {/* Navbar */}
-        <Navbar />
         <Routes>
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
 
-          <Route element={<AuthGuard />}>
-            <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Layout />}>
+            {/* proteced routes */}
+            <Route element={<AuthGuard />}>
               <Route path="profile" element={<div>Profile Page</div>} />
               <Route path="details/checkout" element={<Checkout />} />
               <Route path="detail" element={<Details />} />
             </Route>
+            {/* unprotected routes */}
+            <Route path="dashboard" element={<HomeContainer/>} />
+            <Route path="bus" element={<Bus />} />
           </Route>
-          <Route path="/" element={<Layout />}>
-              <Route path="dashboard" element={<HomeContainer/>} />
-              <Route path="bus" element={<Bus />} />
-          </Route>
-
         </Routes>
-        {/* Footer */}
-        <Footer />
       </div>
       
     </BrowserRouter>
