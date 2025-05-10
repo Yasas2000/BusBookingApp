@@ -74,7 +74,7 @@ const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) 
     const fetchBookedSeats = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3001/booking/booked-seats/${tripId}/${tripDate}`
+          `http://localhost:3000/booking/booked-seats/${tripId}/${tripDate}`
         );
         setBookedSeats(res.data.map(Number));
       } catch (err) {

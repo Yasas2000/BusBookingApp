@@ -37,7 +37,7 @@ const Details = () => {
         seatNumbers: selectedSeats
       };
       
-      const response = await axios.post('http://localhost:3001/booking/book-seat', bookingData,
+      const response = await axios.post('http://localhost:3000/booking/book-seat', bookingData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

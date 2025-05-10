@@ -23,7 +23,7 @@ const Search = () => {
     if (!from || !to || !date || !time) return alert("Please fill all fields");
 
     try {
-      const response = await axios.post("http://localhost:3001/trip/find-trip", {
+      const response = await axios.post("http://localhost:3000/trip/find-trip", {
         start: from,
         destination: to,
         departureTime: time,
