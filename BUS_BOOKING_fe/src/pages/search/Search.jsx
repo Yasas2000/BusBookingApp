@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -35,6 +36,14 @@ const Search = () => {
       console.error(error);
       alert("Error fetching routes");
     }
+  };
+
+
+  const navigate = useNavigate();
+  // Function to handle booking
+  const handleBooking = (trip) => {
+    trip.tripDate = form.date; // Add the date to the trip object
+    navigate('/detail', { state: trip });
   };
 
   return (
@@ -144,13 +153,13 @@ const Search = () => {
                           Departure: <span className="font-medium">{bus.departure}</span> | Arrival:{" "}
                           <span className="font-medium">{bus.arrival}</span>
                         </p>
-                        <p>Available Seats: {bus.availableSeats}</p>
+                        <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
                       </div>
 
                       <div>
                         <button
                           className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
-                          onClick={() => alert(`Booking ${bus.bus_id}`)}
+                          onClick={() => handleBooking(bus)}
                         >
                           Book Now
                         </button>
