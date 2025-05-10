@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { setAuthDetails } from "src/auth/AuthUtils";
+import { getUserEmailFromToken, setAuthDetails } from "src/auth/AuthUtils";
 import { useNavigate} from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { setUser } from "src/redux/userSlice";
 
 export default function Login() {
 	const navigate = useNavigate();
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
+	const dispatch = useDispatch();
 
 	const login = async (event: React.FormEvent) => {
     	event.preventDefault();
@@ -14,6 +17,10 @@ export default function Login() {
 		try {
 			const { data } = await axios.post("/user/login", {email,password});
 			await setAuthDetails(data);
+
+			const userEmail = await getUserEmailFromToken();
+			const response = await axios.get(`user/whoami?email=${userEmail}`);
+			dispatch(setUser(response.data));
 
 			navigate('/dashboard');
 		} catch (error) {

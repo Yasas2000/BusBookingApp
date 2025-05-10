@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-
 interface JWTPayload {
     userId: string;
     name: string;

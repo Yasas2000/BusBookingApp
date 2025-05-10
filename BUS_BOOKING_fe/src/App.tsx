@@ -5,8 +5,6 @@ import Layout from 'src/components/Layout';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/redux/store';
 import HomeContainer from './pages/home_container/HomeContainer';
-import Navbar from './components/navbar/Navbar';
-import Footer from './components/footer/Footer';
 import Bus from './pages/bus/Bus';
 import Details from './pages/bus/Details';
 import Checkout from './pages/checkout/Checkout';
