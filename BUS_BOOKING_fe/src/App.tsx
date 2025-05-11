@@ -8,6 +8,7 @@ import HomeContainer from './pages/home_container/HomeContainer';
 import Bus from './pages/bus/Bus';
 import Details from './pages/bus/Details';
 import Checkout from './pages/checkout/Checkout';
+import Register from './auth/Register';
 
 function App() {
   const isAuthenticated = useSelector((state: RootState) => state.user.authenticated);
@@ -17,8 +18,10 @@ function App() {
       <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-300 flex flex-col overflow-hidden">
         <Routes>
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
             {/* proteced routes */}
             <Route element={<AuthGuard />}>
               <Route path="profile" element={<div>Profile Page</div>} />

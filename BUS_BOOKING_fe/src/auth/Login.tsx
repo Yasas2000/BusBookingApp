@@ -63,6 +63,14 @@ export default function Login() {
 						required
 					/>
 				</div>
+				<div className="flex justify-end mb-4">
+  					<span 
+    					className="text-blue-600 hover:text-blue-800 cursor-pointer text-sm"
+   						 onClick={() => navigate('/register')}
+  					>
+   						 Create an account
+ 					 </span>
+				</div>
 				<button
 					type="submit"
 					className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"

@@ -34,7 +34,7 @@ const Navbar = () => {
     const logout = () => {
         removeAuthDetails();
         dispatch(removeUser());
-        navigate("/login");
+        navigate("/dashboard");
     }
 
     return (
