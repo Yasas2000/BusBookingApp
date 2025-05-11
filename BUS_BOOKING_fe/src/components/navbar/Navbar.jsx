@@ -5,7 +5,7 @@ import Logo from "src/assets/logo.png"
 import { useNavigate } from "react-router-dom";
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone } from 'react-icons/fa6';
-import Theme from '../theme/Theme';
+import Theme from 'src/components/theme/Theme';
 import { removeAuthDetails } from 'src/auth/AuthUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';

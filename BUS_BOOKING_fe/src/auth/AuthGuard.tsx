@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "src/redux/store";
-import { checkTokenExpiration, getUserEmailFromToken, removeAuthDetails, setAuthDetails } from "src/auth/AuthUtils";
+import { checkTokenExpiration, removeAuthDetails, setAuthDetails } from "src/auth/AuthUtils";
 import axios from "axios";
 
 export default function AuthGuard() {

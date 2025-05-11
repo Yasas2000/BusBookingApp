@@ -4,11 +4,11 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Layout from 'src/components/Layout';
 import { useSelector } from 'react-redux';
 import { RootState } from 'src/redux/store';
-import HomeContainer from './pages/home_container/HomeContainer';
-import Bus from './pages/bus/Bus';
-import Details from './pages/bus/Details';
-import Checkout from './pages/checkout/Checkout';
-import Register from './auth/Register';
+import HomeContainer from 'src/pages/home_container/HomeContainer';
+import Bus from 'src/pages/bus/Bus';
+import Details from 'src/pages/bus/Details';
+import Checkout from 'src/pages/checkout/Checkout';
+import Register from 'src/auth/Register';
 
 function App() {
   const isAuthenticated = useSelector((state: RootState) => state.user.authenticated);
