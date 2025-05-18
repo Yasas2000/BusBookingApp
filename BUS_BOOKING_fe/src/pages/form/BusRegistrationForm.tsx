@@ -21,10 +21,11 @@ interface BusFormData {
   name: string;
   capacity: number;
   fare: number;
-  permitNumber: string; // New field
-  busType: string; // New field
+  permitNumber: string;
+  busType: string;
   operatorName: string;
   operatorEmail: string;
+  operatorMobile: string; 
   operatorPassword: string;
   routes: Route[];
 }
@@ -43,6 +44,7 @@ export default function RegisterBusOperator() {
     busType: "standard",
     operatorName: "",
     operatorEmail: "",
+    operatorMobile: "", 
     operatorPassword: "",
     routes: []
   });
@@ -190,7 +192,7 @@ export default function RegisterBusOperator() {
 
     try {
       // Validate form data
-      if (!formData.bus_id || !formData.permitNumber || !formData.operatorEmail || !formData.operatorPassword) {
+      if (!formData.bus_id || !formData.permitNumber || !formData.operatorEmail || !formData.operatorPassword || !formData.operatorMobile) {
         throw new Error("Please fill in all required fields");
       }
 
@@ -356,6 +358,22 @@ export default function RegisterBusOperator() {
               onChange={handleChange}
               className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
               placeholder="e.g., John Doe"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="operatorMobile" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
+              Mobile Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="operatorMobile"
+              name="operatorMobile"
+              type="tel"
+              required
+              value={formData.operatorMobile}
+              onChange={handleChange}
+              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              placeholder="e.g., +94 77 123 4567"
             />
           </div>
           

@@ -19,6 +19,7 @@ exports.registerBusOperator = async (req, res) => {
       operatorName,
       operatorEmail,
       operatorPassword,
+      operatorMobile,
       routes,
       busType,
       permitNumber
@@ -47,6 +48,7 @@ exports.registerBusOperator = async (req, res) => {
       bus_type:busType,
       permit_number:permitNumber,
       operator_id: operatorEmail,
+      phone: operatorMobile,
       capacity,
       fare
     });
