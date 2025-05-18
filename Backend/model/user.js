@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bus = require("./bus");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -13,6 +14,15 @@ const UserSchema = new mongoose.Schema({
   password: {
     require:true,
     type:String
+  },
+  role: {
+    type: String,
+    enum: ["user", "admin","bus"],
+    default: "user",
+  },
+  bus_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Bus",
   },
 });
 

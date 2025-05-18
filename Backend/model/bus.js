@@ -21,6 +21,10 @@ const BusSchema = new mongoose.Schema({
         require:true,
         type:Number
     },
+    permit_number:{
+        require:true,
+        type:String
+    },
     operator_id:String
 });
 
