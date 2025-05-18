@@ -36,7 +36,7 @@ app.use('/bus',busRoutes)
 app.use('/trip',tripRoutes)
 console.log("BACKEND SERVER STARTED");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => {
     console.log(`Server Started at ${port}`)
 })

@@ -13,10 +13,12 @@
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.9.0",
     "busticketbooking": "file:",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "framer-motion": "^11.2.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^5.2.1",
+    "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.23.1"
   },

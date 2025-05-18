@@ -28,7 +28,12 @@ exports.loginUser = async (req, res) => {
         userId: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       };
+
+      if(user.role === "bus"){
+        payload.busId = user.bus_id;
+      }
   
       const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
       const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7d' });

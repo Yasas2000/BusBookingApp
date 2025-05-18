@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const authenticateToken = (req, res, next) => {
+exports.authenticateToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1]; // Extract token from "Bearer token"
 
@@ -15,4 +15,28 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-module.exports = authenticateToken;
+exports.isAdmin = async (req, res, next) => {
+  try {
+    await exports.authenticateToken(req, res, () => {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      next();
+    });
+  } catch (error) {
+    res.status(401).json({ message: 'Authentication failed' });
+  }
+};
+
+exports.isBusOperator = async (req, res, next) => {
+  try {
+    await exports.authenticateToken(req, res, () => {
+      if (req.user.role !== 'bus') {
+        return res.status(403).json({ message: 'Bus operator access required' });
+      }
+      next();
+    });
+  } catch (error) {
+    res.status(401).json({ message: 'Authentication failed' });
+  }
+};
