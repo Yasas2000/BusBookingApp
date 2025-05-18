@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FaSort, FaSortUp, FaSortDown, FaStar } from 'react-icons/fa';
+import RatingPopup from 'src/components/rating/Rating';
 
 const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
@@ -14,6 +15,8 @@ const UserBookings = () => {
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: 'departure_date', direction: 'desc' });
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,8 +87,9 @@ const UserBookings = () => {
   };
 
   const handleReview = (bookingId) => {
-    navigate(`/review/${bookingId}`);
-  };
+    setSelectedBookingId(bookingId);
+    setShowRatingPopup(true);
+};
 
   const formatDateTime = (dateString, timeString) => {
     if (!dateString) return 'Date not available';
@@ -278,10 +282,22 @@ const UserBookings = () => {
                 </div>
               ))
             )}
+            {showRatingPopup && (
+              <RatingPopup 
+                bookingId={selectedBookingId} 
+                onClose={() => {
+                  setShowRatingPopup(false);
+                  setSelectedBookingId(null);
+                  // Optionally refresh bookings to update UI
+                  fetchBookings();
+                }} 
+              />
+            )}
           </div>
         </div>
       )}
     </div>
+    
   );
 };
 
