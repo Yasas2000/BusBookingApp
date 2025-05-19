@@ -4,18 +4,14 @@ const jwt = require("jsonwebtoken")
 require('dotenv').config();
 
 exports.registerUser = async (req,res) =>{
-    const { userType, name, email, mobile, password, busId } = req.body;
+    const { name, email, mobile, password } = req.body;
     const existingUser = await User.findOne({email});
     if(existingUser){
         return res.status(401).json({message: "User already have a account"});
     }
     const hashedPassword = await bycrypt.hash(password,10);
     
-    const userData = { name, email, mobile, password: hashedPassword, userType };
-
-    if (userType === "CONDUCTOR") {
-      userData.busId = busId;
-    }
+    const userData = { name, email, mobile, password: hashedPassword };
 
     const user = new User(userData);
     await user.save();
