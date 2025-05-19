@@ -24,6 +24,11 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (formData.mobile.length != 10) {
+      errorToast("Mobile number must be exactly 10 digits");
+      return;
+    }
     
     try {
       const payload = {
@@ -38,7 +43,7 @@ export default function Register() {
       successToast("successfully registered")
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed');
-      errorToast("Registration failed");
+      errorToast(err.response?.data?.message);
     }
   };
 
