@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { getUserEmailFromToken, setAuthDetails } from "src/auth/AuthUtils";
-import { useNavigate} from 'react-router-dom';
+import { useLocation, useNavigate} from 'react-router-dom';
 import { useDispatch } from "react-redux";
-import { setUser } from "src/redux/userSlice";
+import { setIsAuthenticated, setUser } from "src/redux/userSlice";
 
 export default function Login() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
 	const dispatch = useDispatch();
@@ -21,8 +22,10 @@ export default function Login() {
 			const userEmail = await getUserEmailFromToken();
 			const response = await axios.get(`user/whoami?email=${userEmail}`);
 			dispatch(setUser(response.data));
-
-			navigate('/dashboard');
+			dispatch(setIsAuthenticated(true));
+			
+			const originalPath = location.state?.from?.pathname || '/dashboard';
+      		navigate(originalPath);
 		} catch (error) {
 			console.log("error in login");
 		}

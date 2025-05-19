@@ -1,20 +1,21 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
 
 import Logo from "src/assets/logo.png"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone } from 'react-icons/fa6';
 import Theme from 'src/components/theme/Theme';
-import { removeAuthDetails } from 'src/auth/AuthUtils';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
+import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
 
 const Navbar = () => {
-    const isAuthenticated = useSelector((state) => state.user.authenticated);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
+    const location = useLocation();
 
     const navLinks = [
         { href: "/", label: "Home" },
@@ -32,10 +33,17 @@ const Navbar = () => {
     }
 
     const logout = () => {
+        setIsAuthenticated(false);
         removeAuthDetails();
         dispatch(removeUser());
         navigate("/dashboard");
     }
+
+    useEffect(() => {
+        if ( isAccessTokenAvailable() && !checkTokenExpiration()) {
+            setIsAuthenticated(true);
+        }
+    }, [location.pathname])
 
     return (
         <div className='w-full h-[8ch] bg-neutral-100 dark:bg-neutral-900 flex items-center md:flex-row lg:px-28 md:px-16 sm:px-7 px-4 fixed top-0 z-50'>

@@ -42,10 +42,19 @@ const checkTokenExpiration = (): boolean => {
     return false;
 }   
 
+const isAccessTokenAvailable = (): boolean => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        return false;
+    }
+
+    return true;
+}
+
 const getTokenPayload = () => {
     const token = localStorage.getItem("access_token");
     if (!token) {
-        throw new Error("No access token found");
+        throw new Error("No access token found while getting payload");
     }
 
     const decodedPayload: JWTPayload = decodeJWTToken(token);
@@ -55,11 +64,11 @@ const getTokenPayload = () => {
 const getUserEmailFromToken = () => {
         const token = localStorage.getItem("access_token");
         if (!token) {
-            throw new Error("No access token found");
+            throw new Error("No access token found while getting email from payload");
         }
 
         const decodedPayload = decodeJWTToken(token);
         return decodedPayload.email;
     }
 
-export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails, checkTokenExpiration};
+export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails, checkTokenExpiration, isAccessTokenAvailable};
