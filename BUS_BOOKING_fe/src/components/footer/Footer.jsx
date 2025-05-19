@@ -2,7 +2,7 @@ import React from 'react'
 import { FaMapPin } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
 
-import Logo from "../../assets/logo.png";
+import Logo from "src/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -13,7 +13,7 @@ const Footer = () => {
             <img src={Logo} alt="logo" className="w-44 h-auto object-contain" />
           </Link>
           <p className="text-neutral-600 dark:text-neutral-500 text-base font-normal pr-10">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam placeat corporis, rerum laborum optio laboriosam perferendis sit culpa doloribus, tempora aliquam repellendus reprehenderit, ullam alias.
+            We are a leading bus booking platform, providing a seamless and convenient way to book bus tickets online. Our mission is to make travel easy and accessible for everyone, offering a wide range of bus services across various routes.
           </p>
         </div>
 

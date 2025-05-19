@@ -8,6 +8,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const busRoutes = require("./routes/busRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 
@@ -34,9 +35,10 @@ app.use('/booking',bookingRoutes)
 app.use('/payment',paymentRoutes)
 app.use('/bus',busRoutes)
 app.use('/trip',tripRoutes)
+app.use('/review',reviewRoutes)
 console.log("BACKEND SERVER STARTED");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => {
     console.log(`Server Started at ${port}`)
 })

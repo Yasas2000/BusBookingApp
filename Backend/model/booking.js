@@ -7,6 +7,7 @@ const BookingSchema = new mongoose.Schema({
     departure_date: { type: Date, required: true },
     payment_id: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
     seatNumbers: [{ type: String, required: true }], // Array of seat numbers
+    price: { type: Number, required: true },
     booking_status: { 
         type: String, 
         enum: ["pending", "confirmed", "canceled", "completed"], 

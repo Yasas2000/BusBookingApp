@@ -5,16 +5,18 @@ const Trip = require('../model/trip');
 exports.bookSeat = async (req, res) => {
   try {
     const user_id = req.user.userId; // Assuming user ID is obtained from JWT token
-    const {bus_id, trip_id, departure_date, seatNumbers } = req.body;
+    const {bus_id, trip_id, departure_date, seatNumbers, price } = req.body;
 
     // Validate input
-    if (!user_id || !bus_id || !trip_id || !departure_date || !seatNumbers || seatNumbers.length === 0) {
+    if (!user_id || !bus_id || !trip_id || !departure_date || !seatNumbers || seatNumbers.length === 0 || !price) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
     console.log("Booking request:", req.body);
      
-    const tripDate = moment(departure_date, "YYYY-MM-DD"); 
+    const tripDate = moment.utc(departure_date, "YYYY-MM-DD");
+
+    console.log("Parsed trip date:", tripDate);
     
     // Check if seats are available
     const trip = await Trip.findById(trip_id);
@@ -29,6 +31,7 @@ exports.bookSeat = async (req, res) => {
       booking_status: { $ne: 'canceled' },
       seatNumbers: { $in: seatNumbers }
     });
+
     
     if (existingBookings.length > 0) {
       const bookedSeats = existingBookings.flatMap(booking => booking.seatNumbers);
@@ -46,8 +49,11 @@ exports.bookSeat = async (req, res) => {
       trip_id,
       departure_date: tripDate.toDate(),
       seatNumbers,
+      price,
       booking_status: 'pending'
     });
+
+    console.log("Booking object:", booking);
     
     await booking.save();
     
@@ -66,7 +72,7 @@ exports.bookSeat = async (req, res) => {
 
 exports.getBookedSeats = async (req, res) => {
     const { tripId, tripDateStr  } = req.params;
-    const tripDate = moment(tripDateStr, "YYYY-MM-DD"); // e.g., "2025-05-01"
+    const tripDate = moment.utc(tripDateStr, "YYYY-MM-DD"); // e.g., "2025-05-01"
 
     try {
       const bookings = await Booking.find({
@@ -81,3 +87,79 @@ exports.getBookedSeats = async (req, res) => {
       res.status(500).json({ error: "Failed to load booked seats." });
     }
   };
+
+  // Get pending bookings for the logged-in user
+exports.getPendingBookings = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Assuming user ID is obtained from JWT token
+    
+    const bookings = await Booking.find({
+      user_id: userId,
+      booking_status: 'pending'
+    }).populate('trip_id', 'from to departure');
+    
+    res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching pending bookings:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get all bookings for the logged-in user
+exports.getBookings = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Assuming user ID is obtained from JWT token
+    
+    const bookings = await Booking.find({
+      user_id: userId,
+    }).populate('trip_id', 'from to departure');
+    
+    res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching  bookings:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get count of pending bookings for the logged-in user
+exports.getPendingBookingCount = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Assuming user ID is obtained from JWT token
+    
+    const count = await Booking.countDocuments({
+      user_id: userId,
+      booking_status: 'pending'
+    });
+    
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching pending booking count:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Cancel a booking
+exports.cancelBooking = async (req, res) => {
+  try {
+    const bookingId = req.params.bookingId;
+    const userId = req.user.userId; // Assuming user ID is obtained from JWT token
+    
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      user_id: userId
+    });
+    
+    if (!booking) {
+      console.error('Booking not found or does not belong to user:', bookingId);
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    
+    booking.booking_status = 'canceled';
+    await booking.save();
+    
+    res.json({ message: 'Booking canceled successfully' });
+  } catch (error) {
+    console.error('Error canceling booking:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

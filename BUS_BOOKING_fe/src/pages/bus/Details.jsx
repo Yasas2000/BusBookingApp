@@ -1,18 +1,21 @@
 import React, {useState} from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import Bus from "../../assets/bus9.png";
+import Bus from "src/assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import BusSeatLayout from "../../components/seat/Seat";
+import BusSeatLayout from "src/components/seat/Seat";
+import { useCart } from 'src/context/CartContext';
 import axios from "axios";
 
 const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+
 
 const Details = () => {
   const { state: trip } = useLocation();
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
+  const { incrementCartCount } = useCart();
 
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
@@ -23,31 +26,20 @@ const Details = () => {
     setIsBooking(true);
     
     try {
-      // Assuming you have user authentication and can get the user ID
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2U5MmQ1YjRiZjI2NWU3YjgxY2M3NDciLCJpYXQiOjE3NDY4NjI3ODcsImV4cCI6MTc0Njg2MzY4N30.nvq_bxi6r_Vr02aDoOKaDIbi_sz4qLJ6noAEpH7Tn-s"
-
-      if (!token) {
-        throw new Error('Authentication required. Please log in.');
-      }
-
       const bookingData = {
         bus_id: trip.bus_id,
         trip_id: trip.trip_id,
-        departure_date: trip.tripDate,
-        seatNumbers: selectedSeats
+        departure_date: trip.departureDate,
+        seatNumbers: selectedSeats,
+        price: selectedSeats.length * trip.fare,
       };
       
-      const response = await axios.post('http://localhost:3000/booking/book-seat', bookingData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      const response = await axios.post('/booking/book-seat', bookingData
       );
       
       if (response.data) {
         alert('Booking successful!');
+        incrementCartCount();
         navigate('/bookings', { state: { bookingDetails: response.data } });
       }
     } catch (error) {
@@ -127,7 +119,7 @@ const Details = () => {
               <div className="w-full flex items-center gap-x-3">
                 <div className="w-fit text-base font-semibold">
                   Bus Depart at:{" "}
-                  <span className="ml-1 font-medium">{trip.departure}</span>
+                  <span className="ml-1 font-medium">{trip.departureDate} {trip.departure}</span>
                 </div>
               </div>
             </div>
@@ -137,7 +129,7 @@ const Details = () => {
           <div className="overflow-x-auto">
             <BusSeatLayout
               tripId={trip.trip_id}
-              tripDate={trip.tripDate}
+              tripDate={trip.departureDate}
               capacity={trip.capacity || 56}
               fare={trip.fare}
               onSeatSelect={setSelectedSeats}

@@ -1,28 +1,47 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
-
+import React, { useEffect, useState } from 'react'
+import { Link,useNavigate, useLocation } from 'react-router-dom';
 import Logo from "src/assets/logo.png"
-import { useNavigate, useLocation } from "react-router-dom";
 import { LiaTimesSolid } from 'react-icons/lia';
-import { FaBars, FaPhone } from 'react-icons/fa6';
-import Theme from 'src/components/theme/Theme';
-import { useDispatch } from 'react-redux';
+import { FaBars, FaPhone, FaCartShopping } from 'react-icons/fa6';
+import Theme from '../theme/Theme';
+import { removeAuthDetails } from 'src/auth/AuthUtils';
+import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
-import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
+import { useCart } from 'src/context/CartContext';
 
 const Navbar = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const isAuthenticated = useSelector((state) => state.user.authenticated);
+    const role = useSelector((state) => state.user.user.role);
+    console.log(role);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
-    const location = useLocation();
+    const { cartCount, fetchCartCount } = useCart();
+    const [loading, setLoading] = useState(false);
 
     const navLinks = [
-        { href: "/", label: "Home" },
-        { href: "/about", label: "About" },
-        { href: "/bus", label: "Bus" },
-        { href: "/services", label: "Services" },
+        { href: "/dashboard", label: "Home" }
     ]
+
+    // Fetch cart count when component mounts and when authentication changes
+    useEffect(() => {
+        const getCartCount = async () => {
+            if (isAuthenticated) {
+                setLoading(true);
+                console.log("Fetching cart count...");
+                try {
+                    await fetchCartCount();
+                    console.log("Cart count fetched:", cartCount);
+                } catch (error) {
+                    console.error("Error fetching cart count:", error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        
+        getCartCount();
+    }, [isAuthenticated, fetchCartCount]); // Remove cartCount from dependencies
 
     const handleClick = () => {
         setOpen(!open);
@@ -76,10 +95,55 @@ const Navbar = () => {
                             </Link>
                         </li>
                     ))}
+                    {role === "bus" && (
+                        <li>
+                            <Link
+                                to="/bus-routes"
+                                onClick={handleClose}
+                                className="hover:text-violet-600 ease-in-out duration-300"
+                            >
+                                Bus
+                            </Link>
+                        </li>
+                    )}
+                    {role === "admin" && (
+                        <li>
+                            <Link
+                                to="/bus-register"
+                                onClick={handleClose}
+                                className="hover:text-violet-600 ease-in-out duration-300"
+                            >
+                                Add Bus
+                            </Link>
+                        </li>
+                    )}
+                    {isAuthenticated && (
+                        <li>
+                            <Link
+                                to="/booking"
+                                onClick={handleClose}
+                                className="hover:text-violet-600 ease-in-out duration-300"
+                            >
+                                My Booking
+                            </Link>
+                        </li>
+                    )}
                 </ul>
 
-                <div className="flex md:items-center items-start gap-x-5 gap-y-2 flex-wrap md:flex-row flex-col text-base font-medium text-neutral-800">
-                    <div className="relative bg-violet-600 rounded-md px-8 py-2 w-fit cursor-pointer">
+                <div className="flex md:items-center items-start gap-x-6 gap-y-2 flex-wrap md:flex-row flex-col text-base font-medium text-neutral-800">
+                    {/* Cart Icon with Counter */}
+                    {isAuthenticated && (
+                    <Link to="/cart" className="relative flex items-center justify-center w-10 h-10 mr-4">
+                        <FaCartShopping className="text-2xl text-violet-600" />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
+                    )}
+
+                    <div className="relative bg-violet-600 rounded-md px-8 py-2 w-fit cursor-pointer navbar-call-us">
                         <div className="absolute top-[50%] -left-6 translate-y-[-50%] w-9 h-9 rounded-full bg-violet-600 border-4 border-neutral-100 dark:border-neutral-900 flex items-center justify-center">
                             <FaPhone className='text-neutral-50 text-sm' />
                         </div>
@@ -87,7 +151,7 @@ const Navbar = () => {
                             <p className="text-xs text-neutral-200 font-light">
                                 Need Help?
                             </p>
-                            <p className="text-xs font-normal text-neutral-50 tracking-wide">+91 1234567890</p>
+                            <p className="text-xs font-normal text-neutral-50 tracking-wide">+94 117878787</p>
                         </div>
                     </div>
                     {/* Theme */}
@@ -108,10 +172,8 @@ const Navbar = () => {
                             Sign in
                         </Link>
                     }
-                    
                 </div>
             </div>
-
         </div>
     )
 }

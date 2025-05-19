@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
+
 
 const Search = () => {
   const [form, setForm] = useState({
@@ -23,7 +25,7 @@ const Search = () => {
     if (!from || !to || !date || !time) return alert("Please fill all fields");
 
     try {
-      const response = await axios.post("http://localhost:3000/trip/find-trip", {
+      const response = await axios.post("/trip/find-trip", {
         start: from,
         destination: to,
         departureTime: time,
@@ -42,7 +44,6 @@ const Search = () => {
   const navigate = useNavigate();
   // Function to handle booking
   const handleBooking = (trip) => {
-    trip.tripDate = form.date; // Add the date to the trip object
     navigate('/detail', { state: trip });
   };
 
@@ -145,7 +146,7 @@ const Search = () => {
                     >
                       <div className="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
                         <p>
-                          🚌 <strong>{bus.bus_id}</strong> —{" "}
+                          🚌 <strong>{toUpperCaseLettersOnly(bus.bus_id)}</strong> —{" "}
                           <span className="capitalize">{capitalize(bus.from)}</span> →{" "}
                           <span className="capitalize">{capitalize(bus.to)}</span>
                         </p>
