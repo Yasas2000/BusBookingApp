@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { UserType } from "src/types/userType";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [userType, setUserType] = useState<'customer' | 'conductor'>('customer');
+  const [userType, setUserType] = useState<UserType>(UserType.CUSTOMER);
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
+    email: '',
     mobile: '',
-    busNumber: ''
+    busId: '',
+    password: ''
   });
   const [error, setError] = useState('');
 
@@ -28,9 +30,10 @@ export default function Register() {
       const payload = {
         userType,
         name: formData.name,
-        address: formData.address,
+        email: formData.email,
         mobile: formData.mobile,
-        ...(userType === 'conductor' && { busNumber: formData.busNumber })
+        password: formData.password,
+        ...(userType === 'CONDUCTOR' && { busId: formData.busId.toUpperCase() })
       };
 
       await axios.post('/user/register', payload);
@@ -54,8 +57,8 @@ export default function Register() {
                 type="radio"
                 name="userType"
                 value="customer"
-                checked={userType === 'customer'}
-                onChange={() => setUserType('customer')}
+                checked={userType === UserType.CUSTOMER}
+                onChange={() => setUserType(UserType.CUSTOMER)}
                 className="mr-2"
               />
               Customer
@@ -65,8 +68,8 @@ export default function Register() {
                 type="radio"
                 name="userType"
                 value="conductor"
-                checked={userType === 'conductor'}
-                onChange={() => setUserType('conductor')}
+                checked={userType === UserType.CONDUCTOR}
+                onChange={() => setUserType(UserType.CONDUCTOR)}
                 className="mr-2"
               />
               Conductor
@@ -88,16 +91,30 @@ export default function Register() {
         </div>
 
         <div className="mb-4">
-          <label className="block mb-2 font-semibold" htmlFor="address">Address</label>
+          <label className="block mb-2 font-semibold" htmlFor="address">Email</label>
           <input
             className="w-full px-3 py-2 border rounded"
-            name="address"
+            name="email"
             type="text"
-            value={formData.address}
+            value={formData.email}
             onChange={handleInputChange}
-            placeholder="123 Main Street"
+            placeholder="yyyy@gmail.com"
             required
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-semibold" htmlFor="password">Password</label>
+            <input
+              className="w-full px-3 py-2 border rounded"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Enter your password"
+              required
+              minLength={6}
+            />
         </div>
 
         <div className="mb-4">
@@ -113,17 +130,17 @@ export default function Register() {
           />
         </div>
 
-        {userType === 'conductor' && (
+        {userType === UserType.CONDUCTOR && (
           <div className="mb-6">
             <label className="block mb-2 font-semibold" htmlFor="busNumber">Bus Number</label>
             <input
               className="w-full px-3 py-2 border rounded"
-              name="busNumber"
+              name="busId"
               type="text"
-              value={formData.busNumber}
+              value={formData.busId}
               onChange={handleInputChange}
-              placeholder="NA-1234"
-              required={userType === 'conductor'}
+              placeholder="NA1234"
+              required={userType === UserType.CONDUCTOR}
             />
           </div>
         )}
