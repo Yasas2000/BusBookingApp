@@ -1,7 +1,5 @@
-// src/context/CartContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
 import axios from 'axios';
 
 const CartContext = createContext();
@@ -9,7 +7,7 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const isAuthenticated = useSelector((state) => state.user.authenticated);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {

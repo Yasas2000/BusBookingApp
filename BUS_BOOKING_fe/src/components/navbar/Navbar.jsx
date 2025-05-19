@@ -1,18 +1,16 @@
-// src/components/Navbar.jsx
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link,useNavigate, useLocation } from 'react-router-dom';
 import Logo from "src/assets/logo.png"
-import { useNavigate } from "react-router-dom";
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone, FaCartShopping } from 'react-icons/fa6';
 import Theme from '../theme/Theme';
-import { removeAuthDetails } from 'src/auth/AuthUtils';
+import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
 import { useCart } from 'src/context/CartContext';
 
 const Navbar = () => {
-    const isAuthenticated = useSelector((state) => state.user.authenticated);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const role = useSelector((state) => state.user.user.role);
     console.log(role);
     const dispatch = useDispatch();
@@ -54,10 +52,17 @@ const Navbar = () => {
     }
 
     const logout = () => {
+        setIsAuthenticated(false);
         removeAuthDetails();
         dispatch(removeUser());
-        navigate("/login");
+        navigate("/dashboard");
     }
+
+    useEffect(() => {
+        if ( isAccessTokenAvailable() && !checkTokenExpiration()) {
+            setIsAuthenticated(true);
+        }
+    }, [location.pathname])
 
     return (
         <div className='w-full h-[8ch] bg-neutral-100 dark:bg-neutral-900 flex items-center md:flex-row lg:px-28 md:px-16 sm:px-7 px-4 fixed top-0 z-50'>

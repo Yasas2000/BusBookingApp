@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import App from 'src/App'
 import 'src/index.css';
 import { getBaseURL } from 'src/utils/commonUtils';
-import store from './redux/store';
+import store from 'src/redux/store';
 
 axios.defaults.baseURL = getBaseURL();
 

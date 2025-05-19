@@ -7,7 +7,7 @@ import BusSeatLayout from "src/components/seat/Seat";
 import { useCart } from 'src/context/CartContext';
 import axios from "axios";
 
-const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
 
 const Details = () => {
@@ -103,13 +103,13 @@ const Details = () => {
               </h1>
               <div className="w-full flex sm:flex-row items-center gap-y-2 sm:gap-x-3">
                 <div className="w-full sm:w-fit text-base font-semibold">
-                  From:- <span className="ml-1 font-medium">{capitalize(trip.from)}</span>
+                  From:- <span className="ml-1 font-medium">{capitalize(trip?.from)}</span>
                 </div>
                 <div className="flex-1">
                   <div className="w-full h-[1px] border border-dashed-neutral-200 dark:border-neutral-800/80"></div>
                 </div>
                 <div className="w-full sm:w-fit text-base font-semibold">
-                  To:- <span className="ml-1 font-medium">{capitalize(trip.to)}</span>
+                  To:- <span className="ml-1 font-medium">{capitalize(trip?.to)}</span>
                 </div>
               </div>
             </div>
@@ -119,7 +119,7 @@ const Details = () => {
               <div className="w-full flex items-center gap-x-3">
                 <div className="w-fit text-base font-semibold">
                   Bus Depart at:{" "}
-                  <span className="ml-1 font-medium">{trip.departureDate} {trip.departure}</span>
+                  <span className="ml-1 font-medium">{trip?.departureDate} {trip?.departure}</span>
                 </div>
               </div>
             </div>
@@ -128,10 +128,10 @@ const Details = () => {
           {/* Seat Selection */}
           <div className="overflow-x-auto">
             <BusSeatLayout
-              tripId={trip.trip_id}
-              tripDate={trip.departureDate}
-              capacity={trip.capacity || 56}
-              fare={trip.fare}
+              tripId={trip?.trip_id}
+              tripDate={trip?.departureDate}
+              capacity={trip?.capacity || 56}
+              fare={trip?.fare}
               onSeatSelect={setSelectedSeats}
             />
           </div>
