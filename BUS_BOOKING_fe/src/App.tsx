@@ -35,9 +35,8 @@ function App() {
                 <Route path="booking" element={<UserBookings/>} />
                 <Route path="bus-routes" element={<BusRoutes/>} />
                 <Route path="/operator/seats" element={<SeatLayoutView />} />
-                
-
               </Route>
+              
               {/* Unprotected routes */}
               <Route path="dashboard" element={<HomeContainer/>} />
               <Route path="search" element={<Search />} />
