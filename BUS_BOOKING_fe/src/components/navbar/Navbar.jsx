@@ -113,6 +113,17 @@ const Navbar = () => {
                             </Link>
                         </li>
                     )}
+                    {role === "admin" && (
+                        <li>
+                            <Link
+                                to="/register"
+                                onClick={handleClose}
+                                className="hover:text-violet-600 ease-in-out duration-300"
+                            >
+                                Add User
+                            </Link>
+                        </li>
+                    )}
                     {isAuthenticated && (
                         <li>
                             <Link
