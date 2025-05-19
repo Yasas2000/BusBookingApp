@@ -4,13 +4,13 @@ import Logo from "src/assets/logo.png"
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone, FaCartShopping } from 'react-icons/fa6';
 import Theme from '../theme/Theme';
-import { removeAuthDetails } from 'src/auth/AuthUtils';
+import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
 import { useCart } from 'src/context/CartContext';
 
 const Navbar = () => {
-    const isAuthenticated = useSelector((state) => state.user.authenticated);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const role = useSelector((state) => state.user.user.role);
     console.log(role);
     const dispatch = useDispatch();

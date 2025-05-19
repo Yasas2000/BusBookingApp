@@ -1,7 +1,5 @@
-// src/context/CartContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
 import axios from 'axios';
 
 const CartContext = createContext();

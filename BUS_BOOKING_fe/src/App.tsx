@@ -12,6 +12,7 @@ import UserBookings from 'src/pages/booking/UserBooking';
 import BusRoutes from 'src/pages/routes/BusRoutes';
 import SeatLayoutView from 'src/pages/bus/SeatLayoutView';
 import RegisterBusOperator from 'src/pages/form/BusRegistrationForm';
+import Register from 'src/auth/Register';
 
 
 function App() {
