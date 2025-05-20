@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from 'src/context/CartContext';
 import { formatInTimeZone } from 'date-fns-tz';
+import { useSelector } from 'react-redux';
 
 const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
@@ -15,10 +16,11 @@ const Cart = () => {
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
   const { decrementCartCount } = useCart();
+  const cart = useSelector((state) => state.cart.fares);
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [cart]);
 
   useEffect(() => {
     calculateTotal();
@@ -27,10 +29,9 @@ const Cart = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/booking/pending');
-      setBookings(response.data);
-      setSelectedBookings(response.data.map(booking => booking._id));
-      const totalPrice = response.data.reduce((sum, booking) => {
+      setBookings(cart);
+      setSelectedBookings(cart.map(booking => booking._id));
+      const totalPrice = cart.reduce((sum, booking) => {
         return sum + parseInt(booking.price || 0);
       }, 0);
       setTotal(totalPrice);
@@ -83,7 +84,7 @@ const Cart = () => {
     const selectedBookingsData = bookings.filter(b =>
       selectedBookings.includes(b._id)
     );
-    navigate('/checkout', { state: { bookings: selectedBookingsData, total } });
+    navigate('/details/checkout', { state: { bookings: selectedBookingsData, total } });
   };
 
   const formatDateTime = (dateString, timeString) => {

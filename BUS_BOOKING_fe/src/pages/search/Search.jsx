@@ -35,6 +35,8 @@ const Search = () => {
         maxTransfers: 3,
       });
       
+      setRoutes(response.data.routes || []);
+      
       if (Array.isArray(routes) && routes.length === 0) {
         errorToast("No routes available");
       }
@@ -42,8 +44,6 @@ const Search = () => {
       if (Array.isArray(routes) && routes.length > 0) {
         successToast("Successfully fetched routes");
       }
-
-      setRoutes(response.data.routes || []);
     } catch (error) {
       console.error(error);
       errorToast("Error fetching routes");
