@@ -48,6 +48,7 @@ const Navbar = () => {
     }
 
     const logout = () => {
+        setRole("");
         setIsAuthenticated(false);
         removeAuthDetails();
         dispatch(removeUser());
