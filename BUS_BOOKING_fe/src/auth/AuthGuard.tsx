@@ -1,17 +1,17 @@
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "src/redux/store";
+import { AppDispatch, RootState } from "src/redux/store";
 import { checkTokenExpiration, getUserEmailFromToken, isAccessTokenAvailable, removeAuthDetails, setAuthDetails } from "src/auth/AuthUtils";
 import axios from "axios";
-import { setIsAuthenticated, setUser } from "src/redux/userSlice";
+import { fetchWhoAmI, setIsAuthenticated, setUser, } from "src/redux/userSlice";
 
 export default function AuthGuard() {
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const [loading, setLoading] = useState(true);
   const navigate  = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
       const fetchUserData = async () => {
@@ -20,17 +20,17 @@ export default function AuthGuard() {
           if (accessTokenAvailable) {
             const isTokenExpired = await checkTokenExpiration();
             if (isTokenExpired) {
+              console.log('1')
               const refreshToken = localStorage.getItem("refresh_token");
               const response = await axios.post(`/user/refresh`, { refreshToken: refreshToken });
               setAuthDetails(response.data);
               dispatch(setIsAuthenticated(true));
             } else if (accessTokenAvailable && isAuthenticated){
+              console.log('2')
               dispatch(setIsAuthenticated(true));
             } else {
-              const userEmail = await getUserEmailFromToken();
-              const response = await axios.get(`user/whoami?email=${userEmail}`);
-              dispatch(setUser(response.data));
-              dispatch(setIsAuthenticated(true));
+              console.log('3')
+              await dispatch(fetchWhoAmI());
             }
           }
         } catch (error) {

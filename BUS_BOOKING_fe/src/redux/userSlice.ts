@@ -1,8 +1,11 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
+import { getUserEmailFromToken } from "src/auth/AuthUtils";
 
 interface IUserState {
     user: IUser;
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 export interface IUser {
@@ -13,8 +16,18 @@ export interface IUser {
 
 const initialState: IUserState = {
     user: {} as IUser,
-    isAuthenticated: false
+    isAuthenticated: false,
+    loading: false,
 }
+
+export const fetchWhoAmI = createAsyncThunk<IUser>(
+    "user/fetchWhoAmI",
+    async () => {
+      const userEmail = await getUserEmailFromToken();
+      const response = await axios.get(`user/whoami?email=${userEmail}`);
+      return response.data as IUser;
+    }
+  );
 
 const userSlice = createSlice({
     name: 'user',
@@ -27,6 +40,23 @@ const userSlice = createSlice({
         setIsAuthenticated: (state, action: PayloadAction<boolean>) => {
             state.isAuthenticated = action.payload;
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchWhoAmI.pending, (state) => {
+                state.loading = true;
+                state.isAuthenticated = false;
+            })
+            .addCase(fetchWhoAmI.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.isAuthenticated = true;
+                state.loading = false;
+            })
+            .addCase(fetchWhoAmI.rejected, (state, action) => {
+                state.user = {} as IUser;
+                state.isAuthenticated = false;
+                state.loading = false;
+            })
     }
 });
 
