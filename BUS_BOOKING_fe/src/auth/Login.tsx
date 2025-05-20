@@ -3,7 +3,6 @@ import axios from "axios";
 import { getUserEmailFromToken, setAuthDetails } from "src/auth/AuthUtils";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from "react-redux";
-import { setIsAuthenticated, setUser } from "src/redux/userSlice";
 
 export default function Login() {
   
@@ -13,7 +12,6 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const dispatch = useDispatch();
 
   const login = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -23,12 +21,6 @@ export default function Login() {
     try {
       const { data } = await axios.post("/user/login", { email, password });
       await setAuthDetails(data);
-
-      const userEmail = await getUserEmailFromToken();
-      const response = await axios.get(`user/whoami?email=${userEmail}`);
-      dispatch(setUser(response.data));
-      dispatch(setIsAuthenticated(true));
-
       const originalPath = location.state?.from?.pathname || '/dashboard';
       navigate(originalPath);
     } catch (error: any) {

@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "src/redux/store";
-import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails, setAuthDetails } from "src/auth/AuthUtils";
+import { checkTokenExpiration, getUserEmailFromToken, isAccessTokenAvailable, removeAuthDetails, setAuthDetails } from "src/auth/AuthUtils";
 import axios from "axios";
 import { setIsAuthenticated, setUser } from "src/redux/userSlice";
 
@@ -20,17 +20,19 @@ export default function AuthGuard() {
           if (accessTokenAvailable) {
             const isTokenExpired = await checkTokenExpiration();
             if (isTokenExpired) {
-              console.log("run expire")
               const refreshToken = localStorage.getItem("refresh_token");
               const response = await axios.post(`/user/refresh`, { refreshToken: refreshToken });
               setAuthDetails(response.data);
               dispatch(setIsAuthenticated(true));
-            } else if (accessTokenAvailable){
-              console.log('token check')
+            } else if (accessTokenAvailable && isAuthenticated){
+              dispatch(setIsAuthenticated(true));
+            } else {
+              const userEmail = await getUserEmailFromToken();
+              const response = await axios.get(`user/whoami?email=${userEmail}`);
+              dispatch(setUser(response.data));
               dispatch(setIsAuthenticated(true));
             }
           }
-          console.log(isAuthenticated);
         } catch (error) {
           removeAuthDetails();
           navigate("/login", { replace: true });
