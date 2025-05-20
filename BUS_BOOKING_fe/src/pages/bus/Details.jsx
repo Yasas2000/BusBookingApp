@@ -5,6 +5,8 @@ import { FaStar } from "react-icons/fa6";
 import BusSeatLayout from "src/components/seat/Seat";
 import axios from "axios";
 import { useToast } from "src/utils/useToast";
+import { useDispatch } from "react-redux";
+import { fetchCartData } from 'src/redux/cartSlice';
 
 const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
@@ -18,6 +20,7 @@ const Details = () => {
   const [messageType, setMessageType] = useState('success');
   const [messageText, setMessageText] = useState('');
   const { errorToast, successToast } = useToast();
+  const dispatch = useDispatch();
   
   // Store trip data in sessionStorage to persist through login redirects
   useEffect(() => {
@@ -82,6 +85,7 @@ const Details = () => {
       };
       
       const response = await axios.post('/booking/book-seat', bookingData);
+      dispatch(fetchCartData());
       
       if (response.data) {
         successToast('Booking successful!');
