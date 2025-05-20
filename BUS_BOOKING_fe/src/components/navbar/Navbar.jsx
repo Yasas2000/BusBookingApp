@@ -7,7 +7,7 @@ import Theme from '../theme/Theme';
 import { checkTokenExpiration, getRoleFromToken, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
-import { useCart } from 'src/context/CartContext';
+import { fetchCartData } from 'src/redux/cartSlice';
 
 const Navbar = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,8 +15,8 @@ const Navbar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
-    const { cartCount, fetchCartCount } = useCart();
     const [loading, setLoading] = useState(false);
+    const cartCount = useSelector((state) => state.cart.fares.length);
 
     const navLinks = [
         { href: "/dashboard", label: "Home" }
@@ -27,21 +27,17 @@ const Navbar = () => {
         const getCartCount = async () => {
             if (isAuthenticated) {
                 setLoading(true);
-                setRole(getRoleFromToken)
-                console.log("Fetching cart count...");
-                try {
-                    await fetchCartCount();
-                    console.log("Cart count fetched:", cartCount);
-                } catch (error) {
-                    console.error("Error fetching cart count:", error);
-                } finally {
-                    setLoading(false);
-                }
+                
+               try {
+                setRole(getRoleFromToken);
+                await dispatch(fetchCartData());
+               } catch (error) {
+                console.log(error);
+               }
             }
         };
-        console.log(role)
         getCartCount();
-    }, [isAuthenticated, fetchCartCount]); // Remove cartCount from dependencies
+    }, [isAuthenticated, cartCount]);
 
     const handleClick = () => {
         setOpen(!open);
