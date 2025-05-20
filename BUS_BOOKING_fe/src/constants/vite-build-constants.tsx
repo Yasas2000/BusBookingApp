@@ -1,14 +1,10 @@
 type BuildConstantsType = {
-  VITE_APP_API_PROTOCOL: string;
-  VITE_APP_API_HOST: string;
-  VITE_APP_API_PORT: string;
+  VITE_APP_API_URL: string;
 };
 
 export function getBuildConstant(constName: keyof BuildConstantsType) {
   const BuildConstant = {
-    VITE_APP_API_PROTOCOL: import.meta.env.VITE_APP_API_PROTOCOL,
-    VITE_APP_API_HOST: import.meta.env.VITE_APP_API_HOST,
-    VITE_APP_API_PORT: import.meta.env.VITE_APP_API_PORT,
+    VITE_APP_API_URL: import.meta.env.VITE_APP_API_URL,
     VITE_APP_STRIPE_PK: import.meta.env.VITE_APP_STRIPE_PK,
   };
 
