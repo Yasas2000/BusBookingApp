@@ -9,7 +9,7 @@ interface IUserState {
 }
 
 export interface IUser {
-    user: string;
+    name: string;
     email: string;
     phone: string;
 }

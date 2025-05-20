@@ -2,6 +2,7 @@ interface JWTPayload {
     userId: string;
     name: string;
     email: string;
+    role: string;
     iat: number;
     exp: number;
 }
@@ -71,4 +72,14 @@ const getUserEmailFromToken = () => {
         return decodedPayload.email;
     }
 
-export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails, checkTokenExpiration, isAccessTokenAvailable};
+const getRoleFromToken = () => {
+    const token = localStorage.getItem("access_token");
+        if (!token) {
+            throw new Error("No access token found while getting email from payload");
+        }
+
+        const decodedPayload = decodeJWTToken(token);
+        return decodedPayload.role;
+}
+
+export {decodeJWTToken, setAuthDetails, getUserEmailFromToken, removeAuthDetails, checkTokenExpiration, isAccessTokenAvailable, getRoleFromToken};

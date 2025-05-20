@@ -20,16 +20,13 @@ export default function AuthGuard() {
           if (accessTokenAvailable) {
             const isTokenExpired = await checkTokenExpiration();
             if (isTokenExpired) {
-              console.log('1')
               const refreshToken = localStorage.getItem("refresh_token");
               const response = await axios.post(`/user/refresh`, { refreshToken: refreshToken });
               setAuthDetails(response.data);
               dispatch(setIsAuthenticated(true));
             } else if (accessTokenAvailable && isAuthenticated){
-              console.log('2')
               dispatch(setIsAuthenticated(true));
             } else {
-              console.log('3')
               await dispatch(fetchWhoAmI());
             }
           }
