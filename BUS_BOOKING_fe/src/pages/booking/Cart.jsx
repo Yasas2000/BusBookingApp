@@ -1,8 +1,6 @@
-// src/pages/Bookings.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useCart } from 'src/context/CartContext';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useSelector } from 'react-redux';
 
@@ -15,7 +13,6 @@ const Cart = () => {
   const [total, setTotal] = useState(0);
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
-  const { decrementCartCount } = useCart();
   const cart = useSelector((state) => state.cart.fares);
 
   useEffect(() => {
@@ -56,7 +53,6 @@ const Cart = () => {
         setSelectedBookings(prev => prev.filter(id => id !== bookingId));
       }
       fetchBookings();
-      decrementCartCount();
     } catch (error) {
       console.error('Error canceling booking:', error);
     }

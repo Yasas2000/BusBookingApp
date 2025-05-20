@@ -6,7 +6,6 @@ import HomeContainer from 'src/pages/home_container/HomeContainer';
 import Details from 'src/pages/bus/Details';
 import Checkout from 'src/pages/checkout/Checkout';
 import Search from 'src/pages/search/Search';
-import { CartProvider } from 'src/context/CartContext';
 import Cart from 'src/pages/booking/Cart';
 import UserBookings from 'src/pages/booking/UserBooking';
 import BusRoutes from 'src/pages/routes/BusRoutes';
@@ -18,7 +17,7 @@ import Register from 'src/auth/Register';
 function App() {
   return (
     <BrowserRouter>
-      <CartProvider>
+
         <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-300 flex flex-col overflow-hidden">
           <Routes>
           <Route path="/login" element={<Login />} />
@@ -44,7 +43,6 @@ function App() {
             </Route>
           </Routes>
         </div>
-      </CartProvider>
     </BrowserRouter>
   );
 }

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Bus from "src/assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
 import BusSeatLayout from "src/components/seat/Seat";
-import { useCart } from 'src/context/CartContext';
 import axios from "axios";
 import { useToast } from "src/utils/useToast";
 
@@ -14,7 +13,6 @@ const Details = () => {
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
-  const { incrementCartCount } = useCart();
   const { errorToast, successToast } = useToast();
 
   const handleBooking = async () => {
@@ -39,7 +37,6 @@ const Details = () => {
       
       if (response.data) {
         successToast('Booking successful!');
-        incrementCartCount();
         navigate('/bookings', { state: { bookingDetails: response.data } });
       }
     } catch (error) {
