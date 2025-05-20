@@ -36,7 +36,7 @@ const RatingPopup = ({ bookingId, onClose }) => {
     setError('');
     
     try {
-      await axios.post('/reviews/submit', {
+      await axios.post('/review/submit', {
         booking_id: bookingId,
         rating,
         comment
@@ -47,7 +47,7 @@ const RatingPopup = ({ bookingId, onClose }) => {
         onClose();
       }, 2000);
     } catch (err) {
-      setError('Failed to submit review. Please try again.');
+      setError('Failed to submit review. Please try again.'+err.response.data.message);
       console.error('Error submitting review:', err);
     } finally {
       setIsSubmitting(false);

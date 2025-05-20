@@ -19,7 +19,6 @@ export const CartProvider = ({ children }) => {
   const fetchCartCount = async () => {
     try {
       const response = await axios.get('/booking/pending-count');
-      console.log('hi');
       setCartCount(response.data.count);
     } catch (error) {
       console.error('Error fetching cart count:', error);

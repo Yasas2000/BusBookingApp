@@ -9,7 +9,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const busRoutes = require("./routes/busRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
-const { setupBookingExpirationTask } = require('./utils/ScheduledTaks');
+const { setupBookingExpirationTask, setupBookingCompletionTask } = require('./utils/ScheduledTaks');
 
 const app = express();
 
@@ -29,6 +29,7 @@ app.use(cors({
 
 // Start the scheduled task
 setupBookingExpirationTask();
+setupBookingCompletionTask();
 
 
 app.use(express.json());
@@ -41,6 +42,9 @@ app.use("/bus", busRoutes);
 app.use("/trip", tripRoutes);
 app.use("/review", reviewRoutes);
 console.log("BACKEND SERVER STARTED");
+
+console.log('Server local time:', new Date());
+console.log('Server timezone offset:', new Date().getTimezoneOffset());
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {

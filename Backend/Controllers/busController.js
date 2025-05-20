@@ -4,6 +4,7 @@ const Trip = require('../model/trip');
 const User = require('../model/user');
 const moment = require("moment-timezone");
 const mongoose = require('mongoose');
+const bycrypt = require("bcryptjs")
 
 // Register a new bus operator with bus and trips
 exports.registerBusOperator = async (req, res) => {
@@ -48,7 +49,6 @@ exports.registerBusOperator = async (req, res) => {
       bus_type:busType,
       permit_number:permitNumber,
       operator_id: operatorEmail,
-      phone: operatorMobile,
       capacity,
       fare
     });
@@ -61,6 +61,7 @@ exports.registerBusOperator = async (req, res) => {
       name: operatorName,
       email: operatorEmail,
       password: hashedPassword,
+      phone: operatorMobile,
       role: 'bus',
       bus_id: bus._id
     });

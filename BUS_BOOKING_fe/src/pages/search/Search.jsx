@@ -90,6 +90,22 @@ const Search = () => {
     }
   };
 
+  // Set minimum date and time on component mount
+  useEffect(() => {
+    updateMinDateTime();
+  }, []);
+
+  // Update min date and time when form.date changes
+  useEffect(() => {
+    if (form.date === minDate) {
+      // If selected date is today, enforce min time
+      updateMinTime();
+    } else if (form.date && form.date > minDate) {
+      // If selected date is in the future, no min time restriction
+      setMinTime('');
+    }
+  }, [form.date,form.time]);
+
   // Effect to handle success message and auto-search
   useEffect(() => {
     // Show success message if passed from details page
@@ -159,6 +175,8 @@ const Search = () => {
       errorToast("Please fill all fields");
       return;
     }
+
+    console.log(form)
 
     setLoading(true);
     try {

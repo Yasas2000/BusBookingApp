@@ -1,7 +1,9 @@
+// src/pages/RegisterBusOperator.tsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaPlus, FaTrash, FaArrowRight } from "react-icons/fa";
+import { locations } from "src/data/location";
 
 interface TimeSlot {
   id: string;
@@ -20,7 +22,7 @@ interface BusFormData {
   bus_id: string; // plate number
   name: string;
   capacity: number;
-  fare: number;
+  fare: number | string;
   permitNumber: string;
   busType: string;
   operatorName: string;
@@ -30,16 +32,29 @@ interface BusFormData {
   routes: Route[];
 }
 
+interface ValidationErrors {
+  bus_id?: string;
+  name?: string;
+  fare?: string;
+  permitNumber?: string;
+  operatorName?: string;
+  operatorEmail?: string;
+  operatorMobile?: string;
+  operatorPassword?: string;
+  routes?: string;
+}
+
 export default function RegisterBusOperator() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   
   const [formData, setFormData] = useState<BusFormData>({
     bus_id: "",
     name: "",
     capacity: 56,
-    fare: 0,
+    fare: "",
     permitNumber: "",
     busType: "standard",
     operatorName: "",
@@ -118,10 +133,29 @@ export default function RegisterBusOperator() {
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "capacity" || name === "fare" ? Number(value) : value
-    });
+    
+    // Clear validation error when field is edited
+    if (validationErrors[name as keyof ValidationErrors]) {
+      setValidationErrors({
+        ...validationErrors,
+        [name]: undefined
+      });
+    }
+    
+    // Special handling for fare to fix leading zero issue
+    if (name === "fare") {
+      // Convert to number and back to string to remove leading zeros
+      const numValue = value === "" ? "" : Number(value);
+      setFormData({
+        ...formData,
+        [name]: numValue
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: name === "capacity" ? Number(value) : value
+      });
+    }
   };
 
   // Handle route input changes
@@ -184,43 +218,104 @@ export default function RegisterBusOperator() {
     }
   };
 
+  // Validate form data
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+    
+    // Bus ID validation (remove dashes and make lowercase when checking)
+    if (!formData.bus_id.trim()) {
+      errors.bus_id = "Bus plate number is required";
+    } else if (!/^[a-zA-Z0-9-]+$/.test(formData.bus_id)) {
+      errors.bus_id = "Bus plate number can only contain letters, numbers and hyphens";
+    }
+    
+    // Permit number validation
+    if (!formData.permitNumber.trim()) {
+      errors.permitNumber = "Permit number is required";
+    }
+    
+    // Fare validation
+    if (formData.fare === "" || Number(formData.fare) <= 0) {
+      errors.fare = "Fare must be greater than 0";
+    }
+    
+    // Email validation
+    if (!formData.operatorEmail.trim()) {
+      errors.operatorEmail = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.operatorEmail)) {
+      errors.operatorEmail = "Please enter a valid email address";
+    }
+    
+    // Mobile validation
+    if (!formData.operatorMobile.trim()) {
+      errors.operatorMobile = "Mobile number is required";
+    } else if (!/^(?:\+94|0)[1-9][0-9]{8}$/.test(formData.operatorMobile)) {
+      errors.operatorMobile = "Please enter a valid Sri Lankan mobile number";
+    }
+    
+    // Password validation
+    if (!formData.operatorPassword) {
+      errors.operatorPassword = "Password is required";
+    } else if (formData.operatorPassword.length < 6) {
+      errors.operatorPassword = "Password must be at least 6 characters";
+    }
+    
+    // Routes validation
+    if (formData.routes.length === 0) {
+      errors.routes = "Please add at least one route";
+    } else {
+      for (const route of formData.routes) {
+        if (!route.from || !route.to) {
+          errors.routes = "Please fill in all route details";
+          break;
+        }
+        if (route.from === route.to) {
+          errors.routes = "From and To locations cannot be the same";
+          break;
+        }
+        if (route.timeSlots.length === 0) {
+          errors.routes = `Please add at least one time slot for route ${route.from} to ${route.to}`;
+          break;
+        }
+        for (const slot of route.timeSlots) {
+          if (!slot.departure || !slot.arrival) {
+            errors.routes = `Please fill in all time slot details for route ${route.from} to ${route.to}`;
+            break;
+          }
+        }
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Submit the form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      setError("Please fix the errors in the form");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
     try {
-      // Validate form data
-      if (!formData.bus_id || !formData.permitNumber || !formData.operatorEmail || !formData.operatorPassword || !formData.operatorMobile) {
-        throw new Error("Please fill in all required fields");
-      }
-
-      if (formData.routes.length === 0) {
-        throw new Error("Please add at least one route");
-      }
-
-      // Check if all routes have from, to, and at least one time slot
-      for (const route of formData.routes) {
-        if (!route.from || !route.to) {
-          throw new Error("Please fill in all route details");
-        }
-        if (route.timeSlots.length === 0) {
-          throw new Error(`Please add at least one time slot for route ${route.from} to ${route.to}`);
-        }
-        for (const slot of route.timeSlots) {
-          if (!slot.departure || !slot.arrival) {
-            throw new Error(`Please fill in all time slot details for route ${route.from} to ${route.to}`);
-          }
-        }
-      }
-
-      console.log("Form data:", formData);
+      // Format the bus_id: remove hyphens and convert to lowercase
+      const formattedData = {
+        ...formData,
+        bus_id: formData.bus_id.replace(/-/g, '').toLowerCase(),
+        fare: Number(formData.fare) // Ensure fare is a number
+      };
+      
+      console.log("Form data:", formattedData);
       // Submit data to API
-      const response = await axios.post("/bus/register", formData);
+      const response = await axios.post("/bus/register", formattedData);
       
       alert("Bus operator registered successfully!");
-      navigate("/admin/buses");
+      navigate("/dashboard");
     } catch (error: any) {
       console.error("Error registering bus operator:", error);
       setError(error.response?.data?.message || error.message || "Registration failed. Please try again.");
@@ -254,9 +349,13 @@ export default function RegisterBusOperator() {
               required
               value={formData.bus_id}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.bus_id ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="e.g., NB-1234"
             />
+            {validationErrors.bus_id && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.bus_id}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">Note: Hyphens will be removed and letters will be converted to lowercase when submitted</p>
           </div>
           
           <div>
@@ -270,9 +369,12 @@ export default function RegisterBusOperator() {
               required
               value={formData.permitNumber}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.permitNumber ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="e.g., PER-12345"
             />
+            {validationErrors.permitNumber && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.permitNumber}</p>
+            )}
           </div>
           
           <div>
@@ -333,13 +435,16 @@ export default function RegisterBusOperator() {
             <input
               id="fare"
               name="fare"
-              type="number"
+              type="Number"
               min="0"
               value={formData.fare}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.fare ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="e.g., 500"
             />
+            {validationErrors.fare && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.fare}</p>
+            )}
           </div>
         </div>
         
@@ -372,9 +477,12 @@ export default function RegisterBusOperator() {
               required
               value={formData.operatorMobile}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.operatorMobile ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="e.g., +94 77 123 4567"
             />
+            {validationErrors.operatorMobile && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.operatorMobile}</p>
+            )}
           </div>
           
           <div>
@@ -388,9 +496,12 @@ export default function RegisterBusOperator() {
               required
               value={formData.operatorEmail}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.operatorEmail ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="e.g., operator@example.com"
             />
+            {validationErrors.operatorEmail && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.operatorEmail}</p>
+            )}
           </div>
           
           <div>
@@ -404,9 +515,12 @@ export default function RegisterBusOperator() {
               required
               value={formData.operatorPassword}
               onChange={handleChange}
-              className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${validationErrors.operatorPassword ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'} rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
               placeholder="Enter password"
             />
+            {validationErrors.operatorPassword && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.operatorPassword}</p>
+            )}
           </div>
         </div>
         
@@ -421,6 +535,10 @@ export default function RegisterBusOperator() {
               <FaPlus className="mr-2" /> Add Route
             </button>
           </div>
+          
+          {validationErrors.routes && (
+            <p className="mb-4 text-sm text-red-500">{validationErrors.routes}</p>
+          )}
           
           {formData.routes.length === 0 ? (
             <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
@@ -455,26 +573,40 @@ export default function RegisterBusOperator() {
                       <label className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
                         From
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={route.from}
                         onChange={(e) => handleRouteChange(route.id, 'from', e.target.value)}
                         className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
-                        placeholder="e.g., Colombo"
-                      />
+                      >
+                        <option value="">Select location</option>
+                        {locations.map(location => (
+                          <option key={location.value} value={location.value}>
+                            {location.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     
                     <div>
                       <label className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
                         To
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={route.to}
                         onChange={(e) => handleRouteChange(route.id, 'to', e.target.value)}
                         className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
-                        placeholder="e.g., Kandy"
-                      />
+                      >
+                        <option value="">Select location</option>
+                        {locations.map(location => (
+                          <option 
+                            key={location.value} 
+                            value={location.value}
+                            disabled={location.value === route.from} // Disable same location as "from"
+                          >
+                            {location.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   

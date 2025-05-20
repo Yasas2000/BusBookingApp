@@ -16,6 +16,7 @@ const toUpperCaseLettersOnly = (str) =>
 const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const { fetchCartCount } = useCart();
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
   const bookings = useSelector((state) => state.cart.fares);
@@ -23,7 +24,27 @@ const Cart = () => {
 
   useEffect(() => {
     fetchBookings();
+<<<<<<< HEAD
   }, [bookings]);
+=======
+    
+    // Refresh bookings every minute to keep status updated
+    const intervalId = setInterval(fetchBookings, 600000);
+    return () => clearInterval(intervalId);
+  }, [cart]);
+
+  useEffect(() => {
+    fetchCartCount();
+  }, [total]);
+
+  const calculateTotal = () => {
+    const totalPrice = bookings
+      .filter(booking => selectedBookings.includes(booking._id))
+      .reduce((sum, booking) => sum + parseInt(booking.price || 0), 0);
+    
+    setTotal(totalPrice);
+  };
+>>>>>>> 05dc735 (minor fixes+automated status update)
 
   useEffect(() => {
     calculateTotal();

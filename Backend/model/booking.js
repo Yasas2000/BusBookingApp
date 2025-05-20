@@ -17,4 +17,14 @@ const BookingSchema = new mongoose.Schema({
     expires_at: { type: Date, required: true }
     },{timestamps:true});
 
+BookingSchema.index(
+  { expires_at: 1 },
+  {
+    name: "Pending-Booking-TTL",
+    partialFilterExpression: { booking_status: "pending" },
+    expireAfterSeconds: 0
+  }
+);
+
+
 module.exports = mongoose.model("Booking", BookingSchema);
