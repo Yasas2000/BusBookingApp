@@ -29,6 +29,9 @@ app.use(cors({
     credentials: true                 // Allow cookies to be sent
 }));
 
+app.options('*', cors());
+
+
 // Start the scheduled task
 //setupBookingExpirationTask();
 //setupBookingCompletionTask();
