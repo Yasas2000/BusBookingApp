@@ -29,7 +29,7 @@ app.use(cors({
 
 // Start the scheduled task
 //setupBookingExpirationTask();
-setupBookingCompletionTask();
+//setupBookingCompletionTask();
 
 
 app.use(express.json());
