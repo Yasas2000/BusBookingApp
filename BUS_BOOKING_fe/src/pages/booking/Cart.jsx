@@ -37,6 +37,10 @@ const Cart = () => {
     fetchCartCount();
   }, [total]);
 
+  useEffect(() => {
+    fetchCartCount();
+  }, [total]);
+
   const calculateTotal = () => {
     const totalPrice = bookings
       .filter(booking => selectedBookings.includes(booking._id))

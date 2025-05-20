@@ -178,6 +178,8 @@ const Search = () => {
 
     console.log(form)
 
+    console.log(form)
+
     setLoading(true);
     try {
       const response = await axios.post("/trip/find-trip", {
