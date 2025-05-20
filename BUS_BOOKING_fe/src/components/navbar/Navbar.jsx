@@ -4,15 +4,14 @@ import Logo from "src/assets/logo.png"
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone, FaCartShopping } from 'react-icons/fa6';
 import Theme from '../theme/Theme';
-import { checkTokenExpiration, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
+import { checkTokenExpiration, getRoleFromToken, isAccessTokenAvailable, removeAuthDetails } from "src/auth/AuthUtils";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from 'src/redux/userSlice';
 import { useCart } from 'src/context/CartContext';
 
 const Navbar = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const role = useSelector((state) => state.user.user.role);
-    console.log(role);
+    const [role, setRole] = useState('user');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
@@ -28,6 +27,7 @@ const Navbar = () => {
         const getCartCount = async () => {
             if (isAuthenticated) {
                 setLoading(true);
+                setRole(getRoleFromToken)
                 console.log("Fetching cart count...");
                 try {
                     await fetchCartCount();
@@ -39,7 +39,7 @@ const Navbar = () => {
                 }
             }
         };
-        
+        console.log(role)
         getCartCount();
     }, [isAuthenticated, fetchCartCount]); // Remove cartCount from dependencies
 

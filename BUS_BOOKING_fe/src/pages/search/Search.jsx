@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { useToast } from "src/utils/useToast";
 
 const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
@@ -15,6 +16,7 @@ const Search = () => {
   });
 
   const [routes, setRoutes] = useState([]);
+  const { errorToast, successToast } = useToast();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,7 +24,7 @@ const Search = () => {
 
   const handleSubmit = async () => {
     const { from, to, date, time } = form;
-    if (!from || !to || !date || !time) return alert("Please fill all fields");
+    if (!from || !to || !date || !time) return errorToast("please fill all fields");
 
     try {
       const response = await axios.post("/trip/find-trip", {
@@ -32,11 +34,19 @@ const Search = () => {
         tripDateStr: date,
         maxTransfers: 3,
       });
+      
+      if (Array.isArray(routes) && routes.length === 0) {
+        errorToast("No routes available");
+      }
+      
+      if (Array.isArray(routes) && routes.length > 0) {
+        successToast("Successfully fetched routes");
+      }
 
       setRoutes(response.data.routes || []);
     } catch (error) {
       console.error(error);
-      alert("Error fetching routes");
+      errorToast("Error fetching routes");
     }
   };
 

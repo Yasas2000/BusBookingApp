@@ -6,6 +6,7 @@ import App from 'src/App'
 import 'src/index.css';
 import { getBaseURL } from 'src/utils/commonUtils';
 import store from 'src/redux/store';
+import { ToastContainer } from 'react-toastify';
 
 axios.defaults.baseURL = getBaseURL();
 
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
   <Provider store={store}>
     <App />
+    <ToastContainer />
   </Provider>
 </React.StrictMode>
 )
