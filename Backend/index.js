@@ -11,6 +11,8 @@ const busRoutes = require("./routes/busRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const { setupBookingExpirationTask, setupBookingCompletionTask } = require('./utils/ScheduledTaks');
 
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 const app = express();
 
 const limiter = rateLimit({
@@ -23,7 +25,7 @@ const cors = require("cors");
 
 // Example of setting CORS
 app.use(cors({
-    origin: "http://localhost:5000",  // Allow frontend domain
+    origin: FRONTEND_URL,  // Allow frontend domain
     credentials: true                 // Allow cookies to be sent
 }));
 
