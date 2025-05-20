@@ -5,15 +5,17 @@ type BuildConstantsType = {
 };
 
 export function getBuildConstant(constName: keyof BuildConstantsType) {
-    const BuildConstant = {
-      VITE_APP_API_PROTOCOL: import.meta.env.VITE_APP_API_PROTOCOL,
-      VITE_APP_API_HOST: import.meta.env.VITE_APP_API_HOST,
-      VITE_APP_API_PORT: import.meta.env.VITE_APP_API_PORT,
-    };
-  
-    if (!BuildConstant[constName]) {
-      throw Error(`Invalid configuration: the constant '${constName}' is not set`);
-    }
-    return BuildConstant[constName];
+  const BuildConstant = {
+    VITE_APP_API_PROTOCOL: import.meta.env.VITE_APP_API_PROTOCOL,
+    VITE_APP_API_HOST: import.meta.env.VITE_APP_API_HOST,
+    VITE_APP_API_PORT: import.meta.env.VITE_APP_API_PORT,
+    VITE_APP_STRIPE_PK: import.meta.env.VITE_APP_STRIPE_PK,
+  };
+
+  if (!BuildConstant[constName]) {
+    throw Error(
+      `Invalid configuration: the constant '${constName}' is not set`
+    );
   }
-  
+  return BuildConstant[constName];
+}

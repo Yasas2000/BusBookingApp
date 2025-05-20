@@ -1,16 +1,22 @@
 const mongoose = require("mongoose");
 const Payment = require("../model/payment");
 const Booking = require("../model/booking");
+const { toCamelCase, capitalize } = require("../util/textUtil");
 
-exports.processPayment = async (req, res) => {
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+const processPayment = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const userId = req.user.userId;
-    const { bookingIds, amount, payment_method } = req.body;
+    let userId = req.user.userId;
+    let { bookingIds } = req.body;
 
-    // Fetch all pending bookings for the user from provided IDs
+    const debugBookings = await Booking.find({ _id: { $in: bookingIds } });
+
+    console.log(debugBookings);
+
     const bookings = await Booking.find({
       _id: { $in: bookingIds },
       user_id: userId,
@@ -24,8 +30,6 @@ exports.processPayment = async (req, res) => {
     // Create the payment
     const payment = new Payment({
       user_id: userId,
-      amount,
-      payment_method,
       payment_status: "Completed",
     });
     await payment.save({ session });
@@ -50,8 +54,51 @@ exports.processPayment = async (req, res) => {
       payment,
     });
   } catch (error) {
+    console.error(error);
     await session.abortTransaction();
     session.endSession();
-    res.status(500).json({ message: "Transaction failed", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Transaction failed", error: error.message });
   }
+};
+
+const createCheckoutSession = async (req, res) => {
+  const bookings = req.body.bookings;
+  const idParams = new URLSearchParams();
+
+  const line_items = bookings.map((booking) => {
+    idParams.append("id", booking._id);
+    const date = new Date(booking.trip_id.departure);
+    const from = capitalize(booking.trip_id.from);
+    const to = capitalize(booking.trip_id.to);
+
+    return {
+      price_data: {
+        currency: "lkr",
+        product_data: {
+          name: `From ${from} To ${to} at ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
+          images: [
+            "https://www.shutterstock.com/image-vector/bus-ticketpublic-transport-side-view-600nw-2418862123.jpg",
+          ],
+        },
+        unit_amount: (booking.price * 100) / booking.seatNumbers.length,
+      },
+      quantity: booking.seatNumbers.length,
+    };
+  });
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: line_items,
+    mode: "payment",
+    success_url: process.env.SUCCESS_URL + `&${idParams.toString()}`,
+    cancel_url: process.env.CANCEL_URL,
+  });
+
+  res.json({ id: session.id });
+};
+module.exports = {
+  processPayment,
+  createCheckoutSession,
 };

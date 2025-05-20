@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { formatInTimeZone } from 'date-fns-tz';
+
+// src/pages/Bookings.jsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { formatInTimeZone } from "date-fns-tz";
+import { loadStripe } from "@stripe/stripe-js";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeFare } from 'src/redux/cartSlice';
 
-const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
-const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
+const capitalize = (word) =>
+  word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
+const toUpperCaseLettersOnly = (str) =>
+  str?.replace(/[a-z]/g, (c) => c.toUpperCase());
 
 const Cart = () => {
   const [loading, setLoading] = useState(true);
@@ -27,21 +32,23 @@ const Cart = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      setSelectedBookings(bookings.map(booking => booking._id));
-      const totalPrice = bookings.reduce((sum, booking) => {
+      const response = await axios.get("/booking/pending");
+      setBookings(response.data);
+      setSelectedBookings(response.data.map((booking) => booking._id));
+      const totalPrice = response.data.reduce((sum, booking) => {
         return sum + parseInt(booking.price || 0);
       }, 0);
       setTotal(totalPrice);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      console.error("Error fetching bookings:", error);
       setLoading(false);
     }
   };
 
   const calculateTotal = () => {
     const totalPrice = bookings
-      .filter(booking => selectedBookings.includes(booking._id))
+      .filter((booking) => selectedBookings.includes(booking._id))
       .reduce((sum, booking) => sum + parseInt(booking.price || 0), 0);
     setTotal(totalPrice);
   };
@@ -50,65 +57,84 @@ const Cart = () => {
     try {
       await axios.delete(`/booking/cancel/${bookingId}`);
       if (selectedBookings.includes(bookingId)) {
-        setSelectedBookings(prev => prev.filter(id => id !== bookingId));
+        setSelectedBookings((prev) => prev.filter((id) => id !== bookingId));
       }
       await dispatch(removeFare(bookingId));
     } catch (error) {
-      console.error('Error canceling booking:', error);
+      console.error("Error canceling booking:", error);
     }
   };
 
   const handleSelectBooking = (bookingId) => {
-    setSelectedBookings(prev =>
+    setSelectedBookings((prev) =>
       prev.includes(bookingId)
-        ? prev.filter(id => id !== bookingId)
+        ? prev.filter((id) => id !== bookingId)
         : [...prev, bookingId]
     );
   };
 
   const handleSelectAll = () => {
     setSelectedBookings(
-      selectedBookings.length === bookings.length ? [] : bookings.map(b => b._id)
+      selectedBookings.length === bookings.length
+        ? []
+        : bookings.map((b) => b._id)
     );
   };
 
-  const proceedToCheckout = () => {
+  const proceedToCheckout = async () => {
     if (selectedBookings.length === 0) {
-      alert('Please select at least one booking to checkout');
+      alert("Please select at least one booking to checkout");
       return;
     }
-    const selectedBookingsData = bookings.filter(b =>
+    const selectedBookingsData = bookings.filter((b) =>
       selectedBookings.includes(b._id)
     );
-    navigate('/details/checkout', { state: { bookings: selectedBookingsData, total } });
+    console.log(selectedBookingsData);
+
+    const stripe = await loadStripe(
+      "pk_test_51RPerE4EuMQqPc9ZbAPZ2tn9gA4OPQzaY3ikXbosOM9dUKrqwvskTpJ5byVmJdr1hZ1aMIDGB5qOzpe3f40gAxXe00jSl2lSMs"
+    );
+    const response = await axios.post("/payment/create-checkout-session", {
+      bookings: selectedBookingsData,
+    });
+
+    stripe.redirectToCheckout({
+      sessionId: response.data.id,
+    });
   };
 
   const formatDateTime = (dateString, timeString) => {
-    if (!dateString) return 'Date not available';
+    if (!dateString) return "Date not available";
     try {
       const date = new Date(dateString);
       return (
         <>
-          {formatInTimeZone(date, 'UTC', 'EEEE, MMM d, yyyy')}
+          {formatInTimeZone(date, "UTC", "EEEE, MMM d, yyyy")}
           <br />
           {timeString
-            ? formatInTimeZone(new Date(timeString), 'UTC', 'hh:mm a')
-            : 'Time not available'}
+            ? formatInTimeZone(new Date(timeString), "UTC", "hh:mm a")
+            : "Time not available"}
         </>
       );
     } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
+      console.error("Error formatting date:", error);
+      return "Invalid date";
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 my-[12ch]">
-      <h1 className="text-3xl font-bold text-center text-violet-600 mb-8">Booking Details</h1>
+      <h1 className="text-3xl font-bold text-center text-violet-600 mb-8">
+        Booking Details
+      </h1>
 
       {bookings.length === 0 ? (
         <div className="text-center py-10">
@@ -163,18 +189,25 @@ const Cart = () => {
                   </div>
 
                   <div className="sm:self-start text-sm">
-                    <p className="font-medium">{toUpperCaseLettersOnly(booking.bus_id)}</p>
+                    <p className="font-medium">
+                      {toUpperCaseLettersOnly(booking.bus_id)}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {formatDateTime(booking.departure_date, booking.trip_id?.departure)}
+                      {formatDateTime(
+                        booking.departure_date,
+                        booking.trip_id?.departure
+                      )}
                     </p>
                   </div>
 
                   <div className="text-sm text-center sm:self-start">
                     <p className="font-medium">
-                      {capitalize(booking.trip_id?.from)} - {capitalize(booking.trip_id?.to)}
+                      {capitalize(booking.trip_id?.from)} -{" "}
+                      {capitalize(booking.trip_id?.to)}
                     </p>
                     <p className="text-gray-600 text-xs">
-                      Seats: {booking.seatNumbers.length} ({booking.seatNumbers.join(', ')})
+                      Seats: {booking.seatNumbers.length} (
+                      {booking.seatNumbers.join(", ")})
                     </p>
                   </div>
 
@@ -182,11 +215,13 @@ const Cart = () => {
                     <p
                       className={
                         selectedBookings.includes(booking._id)
-                          ? 'text-violet-600'
-                          : 'text-gray-400'
+                          ? "text-violet-600"
+                          : "text-gray-400"
                       }
                     >
-                      {booking.price || booking.seatNumbers.length * booking.trip_id?.price || 0}
+                      {booking.price ||
+                        booking.seatNumbers.length * booking.trip_id?.price ||
+                        0}
                     </p>
                   </div>
 
@@ -210,30 +245,39 @@ const Cart = () => {
                       onChange={() => handleSelectBooking(booking._id)}
                     />
                     <div className="ml-2">
-                      <p className="font-medium">{toUpperCaseLettersOnly(booking.bus_id)}</p>
+                      <p className="font-medium">
+                        {toUpperCaseLettersOnly(booking.bus_id)}
+                      </p>
                       <p className="text-xs text-gray-500">
-                        {formatDateTime(booking.departure_date, booking.trip_id?.departure)}
+                        {formatDateTime(
+                          booking.departure_date,
+                          booking.trip_id?.departure
+                        )}
                       </p>
                       <p className="font-medium mt-1">
-                        {capitalize(booking.trip_id?.from)} - {capitalize(booking.trip_id?.to)}
+                        {capitalize(booking.trip_id?.from)} -{" "}
+                        {capitalize(booking.trip_id?.to)}
                       </p>
                       <p className="text-gray-600 text-xs">
-                        Seats: {booking.seatNumbers.length} ({booking.seatNumbers.join(', ')})
+                        Seats: {booking.seatNumbers.length} (
+                        {booking.seatNumbers.join(", ")})
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Price and Delete button with proper alignment */}
                   <div className="grid grid-cols-2 items-center">
                     <div className="text-right">
                       <p
                         className={`font-bold text-lg ${
                           selectedBookings.includes(booking._id)
-                            ? 'text-violet-600'
-                            : 'text-gray-400'
+                            ? "text-violet-600"
+                            : "text-gray-400"
                         }`}
                       >
-                        {booking.price || booking.seatNumbers.length * booking.trip_id?.price || 0}
+                        {booking.price ||
+                          booking.seatNumbers.length * booking.trip_id?.price ||
+                          0}
                       </p>
                     </div>
                     <div className="flex justify-center">
@@ -252,7 +296,9 @@ const Cart = () => {
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="text-sm mb-4 sm:mb-0">
-              <p className="text-gray-600">Selected Items: {selectedBookings.length}</p>
+              <p className="text-gray-600">
+                Selected Items: {selectedBookings.length}
+              </p>
               <p className="font-bold text-lg">Total</p>
             </div>
             <p className="font-bold text-xl text-violet-600">Rs. {total}</p>
@@ -263,8 +309,8 @@ const Cart = () => {
             disabled={selectedBookings.length === 0}
             className={`w-full mt-6 py-3 text-white font-medium rounded-md transition-colors ${
               selectedBookings.length > 0
-                ? 'bg-violet-600 hover:bg-violet-700'
-                : 'bg-gray-400 cursor-not-allowed'
+                ? "bg-violet-600 hover:bg-violet-700"
+                : "bg-gray-400 cursor-not-allowed"
             }`}
           >
             Proceed to Checkout
