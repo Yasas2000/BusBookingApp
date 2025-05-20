@@ -2,21 +2,17 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Bus from "src/assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
-import { Link } from "react-router-dom";
 import BusSeatLayout from "src/components/seat/Seat";
-import { useCart } from "src/context/CartContext";
 import axios from "axios";
 import { useToast } from "src/utils/useToast";
 
-const capitalize = (word) =>
-  word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
+const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
 const Details = () => {
   const { state: trip } = useLocation();
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
-  const { incrementCartCount } = useCart();
   const { errorToast, successToast } = useToast();
 
   const handleBooking = async () => {
@@ -36,16 +32,17 @@ const Details = () => {
         price: selectedSeats.length * trip.fare,
       };
 
-      const response = await axios.post("/booking/book-seat", bookingData);
-
+      const response = await axios.post('/booking/book-seat', bookingData
+      );
+      
       if (response.data) {
-        successToast("Booking successful!");
-        incrementCartCount();
-        navigate("/", { state: { bookingDetails: response.data } });
+        successToast('Booking successful!');
+        navigate('/bookings', { state: { bookingDetails: response.data } });
       }
     } catch (error) {
-      console.error("Booking failed:", error);
-      errorToast("Booking failed. Please try again.");
+      console.error('Booking failed:', error);
+      errorToast('Booking failed. Please try again.');
+      console.log(error);
     } finally {
       setIsBooking(false);
     }
@@ -145,7 +142,7 @@ const Details = () => {
           </div>
 
           {/* Checkout Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"
               onClick={handleBooking}

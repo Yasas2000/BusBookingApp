@@ -1,10 +1,12 @@
+
 // src/pages/Bookings.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useCart } from "src/context/CartContext";
 import { formatInTimeZone } from "date-fns-tz";
 import { loadStripe } from "@stripe/stripe-js";
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFare } from 'src/redux/cartSlice';
 
 const capitalize = (word) =>
   word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
@@ -12,16 +14,16 @@ const toUpperCaseLettersOnly = (str) =>
   str?.replace(/[a-z]/g, (c) => c.toUpperCase());
 
 const Cart = () => {
-  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
-  const { decrementCartCount } = useCart();
+  const bookings = useSelector((state) => state.cart.fares);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [bookings]);
 
   useEffect(() => {
     calculateTotal();
@@ -57,8 +59,7 @@ const Cart = () => {
       if (selectedBookings.includes(bookingId)) {
         setSelectedBookings((prev) => prev.filter((id) => id !== bookingId));
       }
-      fetchBookings();
-      decrementCartCount();
+      await dispatch(removeFare(bookingId));
     } catch (error) {
       console.error("Error canceling booking:", error);
     }
