@@ -3,6 +3,7 @@ import axios from "axios";
 
 // Interface for a single booking fare
 export interface IBookingFare {
+  _id: string,
   bus_id: string;
   trip_id: string;
   departure_date: string; 
@@ -38,11 +39,9 @@ const cartSlice = createSlice({
       addFare: (state, action: PayloadAction<IBookingFare>) => {
         state.fares.push(action.payload);
       },
-      removeFare: (state, action: PayloadAction<{ bus_id: string; trip_id: string }>) => {
-        state.fares = state.fares.filter(
-          fare => !(fare.bus_id === action.payload.bus_id && fare.trip_id === action.payload.trip_id)
-        );
-      },
+      removeFare: (state, action: PayloadAction<string>) => {
+      state.fares = state.fares.filter(fare => fare._id !== action.payload);
+    },
     },
     extraReducers: (builder) => {
       builder

@@ -2,22 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFare } from 'src/redux/cartSlice';
 
 const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
 
 const Cart = () => {
-  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
-  const cart = useSelector((state) => state.cart.fares);
+  const bookings = useSelector((state) => state.cart.fares);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchBookings();
-  }, [cart]);
+  }, [bookings]);
 
   useEffect(() => {
     calculateTotal();
@@ -26,9 +27,8 @@ const Cart = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      setBookings(cart);
-      setSelectedBookings(cart.map(booking => booking._id));
-      const totalPrice = cart.reduce((sum, booking) => {
+      setSelectedBookings(bookings.map(booking => booking._id));
+      const totalPrice = bookings.reduce((sum, booking) => {
         return sum + parseInt(booking.price || 0);
       }, 0);
       setTotal(totalPrice);
@@ -52,7 +52,7 @@ const Cart = () => {
       if (selectedBookings.includes(bookingId)) {
         setSelectedBookings(prev => prev.filter(id => id !== bookingId));
       }
-      fetchBookings();
+      await dispatch(removeFare(bookingId));
     } catch (error) {
       console.error('Error canceling booking:', error);
     }
