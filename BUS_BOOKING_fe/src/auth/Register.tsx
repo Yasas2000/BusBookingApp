@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from 'react-router-dom';
 import { UserType } from "src/types/userType";
 import { useSelector } from "react-redux";
+import { useToast } from "src/utils/useToast";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { successToast } = useToast();
+  const [userType, setUserType] = useState<UserType>(UserType.CUSTOMER);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -103,15 +106,17 @@ export default function Register() {
     
     try {
       const payload = {
+        userType,
         name: formData.name,
         email: formData.email,
         mobile: formData.mobile,
         password: formData.password,
+        ...(userType === UserType.CONDUCTOR && { busId: formData.busId.toLowerCase() })
       };
 
       await axios.post('/user/register', payload);
+      successToast("Successfully registered");
       navigate('/login');
-      successToast("successfully registered")
     } catch (err: any) {
       setSubmitError(err.response?.data?.message || 'Registration failed');
     } finally {

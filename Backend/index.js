@@ -28,7 +28,7 @@ app.use(cors({
 }));
 
 // Start the scheduled task
-setupBookingExpirationTask();
+//setupBookingExpirationTask();
 setupBookingCompletionTask();
 
 
@@ -43,8 +43,6 @@ app.use("/trip", tripRoutes);
 app.use("/review", reviewRoutes);
 console.log("BACKEND SERVER STARTED");
 
-console.log('Server local time:', new Date());
-console.log('Server timezone offset:', new Date().getTimezoneOffset());
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {

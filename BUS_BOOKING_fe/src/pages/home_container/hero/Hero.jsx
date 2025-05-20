@@ -37,7 +37,7 @@ const Hero = () => {
                         transition={{duration: 2, ease: 'linear', delay: 0.6}}>
                         Reserve Your Bus <span className="text-violet-400 tracking-wider">Tickets</span> Now
                     </motion.h1>
-                    <motion.p className="text-lg font-normal text-neutral-300 line-clamp-3 text-ellipsis"
+                    <motion.p className="hidden md:block text-lg font-normal text-neutral-300 line-clamp-3 text-ellipsis"
                         initial={{opacity: 0, y: -10}}
                         animate={{opacity: 1, y: 0}}
                         transition={{duration: 2, ease: 'linear', delay: 0.6}}>

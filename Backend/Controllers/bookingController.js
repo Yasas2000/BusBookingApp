@@ -41,7 +41,7 @@ exports.bookSeat = async (req, res) => {
     }
     
     // Set expiration time to 1 hour from now
-    const expiresAt = moment().add(1, 'hour').toDate();
+    const expiresAt = moment.utc().add(1, 'hour').toDate();
     
     // Create new booking
     const booking = new Booking({

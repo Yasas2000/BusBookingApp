@@ -24,14 +24,10 @@ const Cart = () => {
 
   useEffect(() => {
     fetchBookings();
-<<<<<<< HEAD
-  }, [bookings]);
-=======
-    
     // Refresh bookings every minute to keep status updated
     const intervalId = setInterval(fetchBookings, 600000);
     return () => clearInterval(intervalId);
-  }, [cart]);
+  }, [bookings]);
 
   useEffect(() => {
     fetchCartCount();
@@ -48,7 +44,6 @@ const Cart = () => {
     
     setTotal(totalPrice);
   };
->>>>>>> 05dc735 (minor fixes+automated status update)
 
   useEffect(() => {
     calculateTotal();
@@ -68,13 +63,6 @@ const Cart = () => {
       console.error("Error fetching bookings:", error);
       setLoading(false);
     }
-  };
-
-  const calculateTotal = () => {
-    const totalPrice = bookings
-      .filter((booking) => selectedBookings.includes(booking._id))
-      .reduce((sum, booking) => sum + parseInt(booking.price || 0), 0);
-    setTotal(totalPrice);
   };
 
   const handleDelete = async (bookingId) => {
