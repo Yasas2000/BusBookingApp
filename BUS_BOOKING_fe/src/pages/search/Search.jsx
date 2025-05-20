@@ -35,13 +35,12 @@ const Search = () => {
         maxTransfers: 3,
       });
       
-      setRoutes(response.data.routes || []);
+      const routesData = response.data.routes || [];
+      setRoutes(routesData);
       
-      if (Array.isArray(routes) && routes.length === 0) {
+      if (Array.isArray(routesData) && routesData.length === 0) {
         errorToast("No routes available");
-      }
-      
-      if (Array.isArray(routes) && routes.length > 0) {
+      } else if (Array.isArray(routesData) && routesData.length > 0) {
         successToast("Successfully fetched routes");
       }
     } catch (error) {
