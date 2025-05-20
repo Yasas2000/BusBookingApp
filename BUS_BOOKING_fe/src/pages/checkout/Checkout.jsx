@@ -5,13 +5,14 @@ import { useLocation } from 'react-router-dom';
 
 const Checkout = () => {
   const [total, setTotal] = useState(0);
-  const cartData = useSelector((state) => state.cart.fares)
   const location = useLocation();
+  const [bookingData, setBookingData] = useState([]);
 
   useEffect(() => {
-    const totalPrice = cartData.reduce((sum, booking) => {
-      return sum + parseInt(booking.price || 0);
-    }, 0);
+    const bookings = location.state?.bookings
+    const totalPrice = location.state?.total;
+
+    setBookingData(bookings);
     setTotal(totalPrice)
   }, [])
 
@@ -93,7 +94,7 @@ const Checkout = () => {
               Your Booking Status
             </h2>
 
-            {cartData.map((booking) => (
+            {bookingData.map((booking) => (
             <div className="space-y-8 pb-3">
               <div className="space-y-4">
                 <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
