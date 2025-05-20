@@ -5,6 +5,7 @@ import { FaStar } from "react-icons/fa6";
 import BusSeatLayout from "src/components/seat/Seat";
 import { useCart } from 'src/context/CartContext';
 import axios from "axios";
+import { useToast } from "src/utils/useToast";
 
 const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
@@ -14,6 +15,7 @@ const Details = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
   const { incrementCartCount } = useCart();
+  const { errorToast, successToast } = useToast();
 
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
@@ -36,13 +38,13 @@ const Details = () => {
       );
       
       if (response.data) {
-        alert('Booking successful!');
+        successToast('Booking successful!');
         incrementCartCount();
         navigate('/bookings', { state: { bookingDetails: response.data } });
       }
     } catch (error) {
       console.error('Booking failed:', error);
-      alert('Booking failed. Please try again.');
+      errorToast('Booking failed. Please try again.');
       console.log(error);
     } finally {
       setIsBooking(false);
