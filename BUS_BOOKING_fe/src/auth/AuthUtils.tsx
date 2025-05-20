@@ -75,7 +75,7 @@ const getUserEmailFromToken = () => {
 const getRoleFromToken = () => {
     const token = localStorage.getItem("access_token");
         if (!token) {
-            throw new Error("No access token found while getting email from payload");
+            throw new Error("No access token found while getting role from payload");
         }
 
         const decodedPayload = decodeJWTToken(token);
