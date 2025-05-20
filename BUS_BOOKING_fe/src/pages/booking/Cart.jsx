@@ -23,14 +23,11 @@ const Cart = () => {
 
   useEffect(() => {
     fetchBookings();
+    
     // Refresh bookings every minute to keep status updated
     const intervalId = setInterval(fetchBookings, 60000);
     return () => clearInterval(intervalId);
   }, []);
-
-  useEffect(() => {
-    fetchBookings();
-  }, [bookings]);
 
   useEffect(() => {
     calculateTotal();
@@ -40,13 +37,6 @@ const Cart = () => {
     try {
       setLoading(true);
       const response = await axios.get("/booking/pending");
-<<<<<<< HEAD
-      setSelectedBookings(response.data.map((booking) => booking._id));
-      const totalPrice = response.data.reduce((sum, booking) => {
-        return sum + parseInt(booking.price || 0);
-      }, 0);
-      setTotal(totalPrice);
-=======
       
       // Filter out any bookings that might have expired on the server
       const validBookings = response.data.filter(booking => 
@@ -54,7 +44,6 @@ const Cart = () => {
       );
       
       setSelectedBookings(validBookings.map((booking) => booking._id));
->>>>>>> bdbaad0 (fixed conflicts)
       setLoading(false);
     } catch (error) {
       console.error("Error fetching bookings:", error);
