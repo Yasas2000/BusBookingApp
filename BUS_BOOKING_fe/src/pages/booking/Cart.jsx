@@ -33,7 +33,6 @@ const Cart = () => {
     try {
       setLoading(true);
       const response = await axios.get("/booking/pending");
-      setBookings(response.data);
       setSelectedBookings(response.data.map((booking) => booking._id));
       const totalPrice = response.data.reduce((sum, booking) => {
         return sum + parseInt(booking.price || 0);
