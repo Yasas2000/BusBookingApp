@@ -11,7 +11,7 @@ const Search = () => {
   const location = useLocation();
   const { errorToast, successToast } = useToast();
   
-  // State for min date and time
+  // State for min date and time (removed duplicates)
   const [minDate, setMinDate] = useState('');
   const [minTime, setMinTime] = useState('');
   
@@ -51,7 +51,7 @@ const Search = () => {
       // If selected date is in the future, no min time restriction
       setMinTime('');
     }
-  }, [form.date, minDate]);
+  }, [form.date, minDate, form.time]);
 
   // Function to update minimum date and time
   const updateMinDateTime = () => {
@@ -89,22 +89,6 @@ const Search = () => {
       }));
     }
   };
-
-  // Set minimum date and time on component mount
-  useEffect(() => {
-    updateMinDateTime();
-  }, []);
-
-  // Update min date and time when form.date changes
-  useEffect(() => {
-    if (form.date === minDate) {
-      // If selected date is today, enforce min time
-      updateMinTime();
-    } else if (form.date && form.date > minDate) {
-      // If selected date is in the future, no min time restriction
-      setMinTime('');
-    }
-  }, [form.date,form.time]);
 
   // Effect to handle success message and auto-search
   useEffect(() => {
@@ -158,7 +142,7 @@ const Search = () => {
       // still mark initial load as complete
       setInitialLoad(false);
     }
-  }, [form, initialLoad]);
+  }, [form.from, form.to, form.date, form.time, initialLoad]);
 
   // Save form to sessionStorage whenever it changes
   useEffect(() => {
@@ -175,10 +159,6 @@ const Search = () => {
       errorToast("Please fill all fields");
       return;
     }
-
-    console.log(form)
-
-    console.log(form)
 
     setLoading(true);
     try {
