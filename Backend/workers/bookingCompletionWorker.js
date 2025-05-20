@@ -43,6 +43,8 @@ async function processCompletedBookings() {
         const departureDate = moment(booking.departure_date);
         const tripDeparture = moment.utc(trip.departure);
         const tripArrival = moment.utc(trip.arrival);
+
+        
         
         // Create trip end datetime by combining departure date with arrival time
         const tripEndDateTime = departureDate.clone()
@@ -56,6 +58,7 @@ async function processCompletedBookings() {
           tripEndDateTime.add(1, 'day');
         }
         
+        console.log(tripEndDateTime.toDate());
         // If current time is past the trip end time, mark as completed
         if (moment(now).isAfter(tripEndDateTime)) {
           await Booking.updateOne(

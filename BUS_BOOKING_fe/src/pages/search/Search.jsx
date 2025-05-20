@@ -57,9 +57,9 @@ const Search = () => {
   // Function to update minimum date and time
   const updateMinDateTime = () => {
     const now = new Date();
-    
+    console.log(now)
     // Set min date to today in YYYY-MM-DD format
-    const today = now.toISOString().split('T')[0];
+    const today = new Intl.DateTimeFormat('en-CA').format(now);
     setMinDate(today);
     
     // If the current date is already selected, update min time
@@ -92,7 +92,7 @@ const updateMinTime = () => {
     // If we crossed midnight, we need to select the next day
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = new Intl.DateTimeFormat('en-CA').format(tomorrow);
     
     // Update the date to tomorrow and reset time
     setForm(prev => ({

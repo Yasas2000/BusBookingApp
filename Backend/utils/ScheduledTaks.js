@@ -32,7 +32,7 @@ const setupBookingExpirationTask = () => {
 // Setup task to mark bookings as completed after trip ends
 const setupBookingCompletionTask = () => {
   // Run every hour
-  cron.schedule('0 * * * *', () => {
+  cron.schedule('*/1 * * * *', () => {
     console.log('Running booking completion task:', new Date().toISOString());
     const worker = fork('./workers/bookingCompletionWorker.js');
     

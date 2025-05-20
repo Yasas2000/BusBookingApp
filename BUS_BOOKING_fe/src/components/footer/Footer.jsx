@@ -63,7 +63,7 @@ const Footer = () => {
                   For Support & Reservations
                 </p>
                 <p className="text-sm text-neutral-700 dark:text-neutral-400">
-                  123, Main Street, Anytown, USA
+                  123, Main Street, Anytown, SL
                 </p>
               </div>
             </div>
@@ -75,7 +75,7 @@ const Footer = () => {
                   For Support & Reservations
                 </p>
                 <p className="text-sm text-neutral-700 dark:text-neutral-400">
-                  123, Main Street, Anytown, USA
+                  123, Main Street, Anytown, SL
                 </p>
               </div>
             </div>
@@ -87,7 +87,7 @@ const Footer = () => {
                   For Support & Reservations
                 </p>
                 <p className="text-sm text-neutral-700 dark:text-neutral-400">
-                  123, Main Street, Anytown, USA
+                  123, Main Street, Anytown, SL
                 </p>
               </div>
             </div>

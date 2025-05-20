@@ -2,6 +2,86 @@ const mongoose = require("mongoose");
 const Payment = require("../model/payment");
 const Booking = require("../model/booking");
 const { toCamelCase, capitalize } = require("../util/textUtil");
+const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs').promises;
+const handlebars = require('handlebars');
+
+// Set up the email template
+const getEmailTemplate = async () => {
+  const templatePath = path.join(__dirname, '../templates/ticket-template.html');
+  const source = await fs.readFile(templatePath, 'utf-8');
+  return handlebars.compile(source);
+};
+
+// Configure email transporter
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail', // or any other email service
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+};
+
+const sendTicketEmail = async (booking, userEmail) => {
+  try {
+    const transporter = createTransporter();
+    const template = await getEmailTemplate();
+    
+    // Format date and time
+    const departureDate = new Date(booking.departure_date);
+    const formattedDate = departureDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    // Get departure and arrival times
+    const departureTime = booking.trip_id.departure;
+    const arrivalTime = booking.trip_id.arrival;
+    
+    // Prepare data for the email template
+    const emailData = {
+      ticketId: booking._id,
+      busId: booking.bus_id,
+      from: capitalize(booking.trip_id.from),
+      to: capitalize(booking.trip_id.to),
+      departureDate: formattedDate,
+      departureTime: departureTime,
+      arrivalTime: arrivalTime,
+      seatNumbers: booking.seatNumbers.join(', '),
+      totalPrice: booking.price,
+      logoUrl: 'https://bus-ease-frontend.vercel.app/assets/logo-BRVg03aY.png' // Replace with your actual logo URL
+    };
+    
+    const htmlToSend = template(emailData);
+    
+    const mailOptions = {
+      from: '"Bus Ease" <bus.ease.lk.official@gmail.com>',
+      to: userEmail,
+      subject: 'Your Bus Ticket Confirmation',
+      html: htmlToSend,
+      attachments: [
+        {
+          filename: 'bus-ease-logo.png',
+          path: path.join(__dirname, '../assets/logo.png'),
+          cid: 'logo' // This ID will be used in the template to reference the image
+        }
+      ]
+    };
+    
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent: ' + info.response);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return false;
+  }
+};
+
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -49,8 +129,17 @@ const processPayment = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    // Get user email from the database
+    const email = req.user.email;
+    const userEmail = email
+
+    // Send ticket email for each booking
+    for (const booking of bookings) {
+      await sendTicketEmail(booking, userEmail);
+    }
+
     res.json({
-      message: "Payment processed and bookings confirmed.",
+      message: "Payment processed and bookings confirmed. Tickets send by email",
       payment,
     });
   } catch (error) {

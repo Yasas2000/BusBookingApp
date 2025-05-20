@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bus Ticket Confirmation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .ticket {
+      border: 2px solid #7b4ea2;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      background-color: #f9f9f9;
+    }
+    .ticket-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      max-width: 200px;
+      margin-bottom: 10px;
+    }
+    .ticket-title {
+      color: #7b4ea2;
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    .ticket-info {
+      margin-bottom: 20px;
+    }
+    .ticket-info p {
+      margin: 5px 0;
+    }
+    .route {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 15px 0;
+    }
+    .route-line {
+      flex-grow: 1;
+      height: 2px;
+      background-color: #7b4ea2;
+      margin: 0 10px;
+    }
+    .seat-info {
+      background-color: #f0e6ff;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    .important-note {
+      background-color: #fff3cd;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+    .orange-text {
+      color: #f7941d;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <div class="ticket-header">
+      <img src="cid:logo" alt="Bus Ease Logo" class="logo">
+      <h1 class="ticket-title">Bus Ticket Confirmation</h1>
+      <p class="orange-text">ENJOY OUR SERVICES</p>
+    </div>
+    
+    <div class="ticket-info">
+      <p><strong>Ticket ID:</strong> {{ticketId}}</p>
+      <p><strong>Bus Number:</strong> {{busId}}</p>
+      
+      <div class="route">
+        <div><strong>{{from}}</strong></div>
+        <div class="route-line"></div>
+        <div><strong>{{to}}</strong></div>
+      </div>
+      
+      <p><strong>Date:</strong> {{departureDate}}</p>
+      <p><strong>Departure Time:</strong> {{departureTime}}</p>
+      <p><strong>Arrival Time:</strong> {{arrivalTime}}</p>
+      
+      <div class="seat-info">
+        <p><strong>Seat Numbers:</strong> {{seatNumbers}}</p>
+        <p><strong>Total Price:</strong> Rs. {{totalPrice}}</p>
+      </div>
+    </div>
+    
+    <div class="important-note">
+      <p><strong>Important:</strong> Please arrive at least 15 minutes before departure time. Show this ticket (printed or on your phone) to the bus conductor.</p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>Thank you for choosing Bus Ease. For any assistance, please contact our customer support at 1315.</p>
+    <p>&copy; 2025 Bus Ease. All rights reserved.</p>
+  </div>
+</body>
+</html>

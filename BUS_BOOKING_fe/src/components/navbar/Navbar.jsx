@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Link,useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from "src/assets/logo.png"
 import { LiaTimesSolid } from 'react-icons/lia';
 import { FaBars, FaPhone, FaCartShopping } from 'react-icons/fa6';
@@ -14,14 +14,16 @@ const Navbar = () => {
     const [role, setRole] = useState('user');
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const cartCount = useSelector((state) => state.cart.fares.length);
+    const location = useLocation();
+    const navRef = useRef(null);
 
     const navLinks = [
         { href: "/dashboard", label: "Home" }
-    ]
-    console.log(role)
+    ];
+    
     // Fetch cart count when component mounts and when authentication changes
     useEffect(() => {
         const getCartCount = async () => {
@@ -37,7 +39,28 @@ const Navbar = () => {
             }
         };
         getCartCount();
-    }, [isAuthenticated]);
+    }, [isAuthenticated, dispatch]);
+
+    // Add click outside listener to close the menu
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (open && navRef.current && !navRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        };
+
+        // Add event listener when menu is open
+        if (open) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchend', handleClickOutside);
+        }
+
+        // Clean up event listener
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchend', handleClickOutside);
+        };
+    }, [open]);
 
     const handleClick = () => {
         setOpen(!open);
@@ -56,10 +79,10 @@ const Navbar = () => {
     }
 
     useEffect(() => {
-        if ( isAccessTokenAvailable() && !checkTokenExpiration()) {
+        if (isAccessTokenAvailable() && !checkTokenExpiration()) {
             setIsAuthenticated(true);
         }
-    }, [location.pathname])
+    }, [location.pathname]);
 
     return (
         <div className='w-full h-[8ch] bg-neutral-100 dark:bg-neutral-900 flex items-center md:flex-row lg:px-28 md:px-16 sm:px-7 px-4 fixed top-0 z-50'>
@@ -79,7 +102,10 @@ const Navbar = () => {
             </button>
 
             {/* Navigation links */}
-            <div className={`${open ? 'flex absolute top-14 left-0 w-full h-auto md:h-auto md:relative' : 'hidden'} flex-1 md:flex flex-col md:flex-row gap-x-5 gap-y-2 md:items-center md:p-0 sm:p-4 p-4 justify-between md:bg-transparent bg-neutral-100 md:shadow-none shadow-md rounded-md`}>
+            <div 
+                ref={navRef}
+                className={`${open ? 'flex absolute top-14 left-0 w-full h-auto md:h-auto md:relative' : 'hidden'} flex-1 md:flex flex-col md:flex-row gap-x-5 gap-y-2 md:items-center md:p-0 sm:p-4 p-4 justify-between md:bg-transparent bg-neutral-100 md:shadow-none shadow-md rounded-md`}
+            >
                 <ul className="list-none flex md:items-center items-start gap-x-5 gap-y-1 flex-wrap md:flex-row flex-col text-base text-neutral-600 dark:text-neutral-500 font-medium">
                     {navLinks.map((link, index) => (
                         <li key={index}>
@@ -141,7 +167,7 @@ const Navbar = () => {
                 <div className="flex md:items-center items-start gap-x-6 gap-y-2 flex-wrap md:flex-row flex-col text-base font-medium text-neutral-800">
                     {/* Cart Icon with Counter */}
                     {isAuthenticated && (
-                    <Link to="/cart" className="relative flex items-center justify-center w-10 h-10 mr-4">
+                    <Link to="/cart" onClick={handleClose} className="relative flex items-center justify-center w-10 h-10 mr-4">
                         <FaCartShopping className="text-2xl text-violet-600" />
                         {cartCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">
@@ -168,13 +194,17 @@ const Navbar = () => {
                         <button
                             type="button"
                             className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors duration-200 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-                            onClick={() => logout()}
+                            onClick={() => {
+                                logout();
+                                handleClose();
+                            }}
                         >   
                             Logout
                         </button>
                         : 
                         <Link
                             to="/login"
+                            onClick={handleClose}
                             className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors duration-200 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
                         >
                             Sign in
