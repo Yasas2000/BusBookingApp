@@ -1,14 +1,15 @@
-import React, {useState} from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Bus from "src/assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import BusSeatLayout from "src/components/seat/Seat";
-import { useCart } from 'src/context/CartContext';
+import { useCart } from "src/context/CartContext";
 import axios from "axios";
+import { useToast } from "src/utils/useToast";
 
-const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
-
+const capitalize = (word) =>
+  word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
 const Details = () => {
   const { state: trip } = useLocation();
@@ -16,15 +17,16 @@ const Details = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [isBooking, setIsBooking] = useState(false);
   const { incrementCartCount } = useCart();
+  const { errorToast, successToast } = useToast();
 
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
-      alert("Please select at least one seat");
+      errorToast("Please select at least one seat");
       return;
     }
-    
+
     setIsBooking(true);
-    
+
     try {
       const bookingData = {
         bus_id: trip.bus_id,
@@ -33,24 +35,22 @@ const Details = () => {
         seatNumbers: selectedSeats,
         price: selectedSeats.length * trip.fare,
       };
-      
-      const response = await axios.post('/booking/book-seat', bookingData
-      );
-      
+
+      const response = await axios.post("/booking/book-seat", bookingData);
+
       if (response.data) {
-        alert('Booking successful!');
+        successToast("Booking successful!");
         incrementCartCount();
-        navigate('/bookings', { state: { bookingDetails: response.data } });
+        navigate("/", { state: { bookingDetails: response.data } });
       }
     } catch (error) {
-      console.error('Booking failed:', error);
-      alert('Booking failed. Please try again.');
-      console.log(error);
+      console.error("Booking failed:", error);
+      errorToast("Booking failed. Please try again.");
     } finally {
       setIsBooking(false);
     }
   };
-  
+
   return (
     <div className="w-full px-4 sm:px-7 md:px-16 lg:px-28 my-8 md:my-[10ch]">
       {/* Main content grid - changes to single column on mobile */}
@@ -103,13 +103,19 @@ const Details = () => {
               </h1>
               <div className="w-full flex sm:flex-row items-center gap-y-2 sm:gap-x-3">
                 <div className="w-full sm:w-fit text-base font-semibold">
-                  From:- <span className="ml-1 font-medium">{capitalize(trip?.from)}</span>
+                  From:-{" "}
+                  <span className="ml-1 font-medium">
+                    {capitalize(trip?.from)}
+                  </span>
                 </div>
                 <div className="flex-1">
                   <div className="w-full h-[1px] border border-dashed-neutral-200 dark:border-neutral-800/80"></div>
                 </div>
                 <div className="w-full sm:w-fit text-base font-semibold">
-                  To:- <span className="ml-1 font-medium">{capitalize(trip?.to)}</span>
+                  To:-{" "}
+                  <span className="ml-1 font-medium">
+                    {capitalize(trip?.to)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -119,12 +125,14 @@ const Details = () => {
               <div className="w-full flex items-center gap-x-3">
                 <div className="w-fit text-base font-semibold">
                   Bus Depart at:{" "}
-                  <span className="ml-1 font-medium">{trip?.departureDate} {trip?.departure}</span>
+                  <span className="ml-1 font-medium">
+                    {trip?.departureDate} {trip?.departure}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-          
+
           {/* Seat Selection */}
           <div className="overflow-x-auto">
             <BusSeatLayout
@@ -138,12 +146,6 @@ const Details = () => {
 
           {/* Checkout Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              to={"/details/checkout"}
-              className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"
-            >
-              Proceed To Checkout
-            </Link>
             <button
               className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"
               onClick={handleBooking}

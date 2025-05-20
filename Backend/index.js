@@ -1,5 +1,5 @@
 const express = require("express");
-const rateLimit = require("express-rate-limit")
+const rateLimit = require("express-rate-limit");
 
 const database = require("./Configurations/database");
 const routes = require("./routes/routes");
@@ -13,32 +13,33 @@ const reviewRoutes = require("./routes/reviewRoutes");
 const app = express();
 
 const limiter = rateLimit({
-    max: 200,
-    windowMs: 60 * 60 * 1000,
-    message: "Too many request from this IP"
+  max: 200,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many request from this IP",
 });
 
-const cors = require('cors');
+const cors = require("cors");
 
 // Example of setting CORS
-app.use(cors({
-    origin: "http://localhost:5000",  // Allow frontend domain
-    credentials: true                 // Allow cookies to be sent
-}));
-
+app.use(
+  cors({
+    origin: "http://localhost:5000", // Allow frontend domain
+    credentials: true, // Allow cookies to be sent
+  })
+);
 
 app.use(express.json());
 app.use(limiter);
-app.use('/api',routes);
-app.use('/user',userRoutes)
-app.use('/booking',bookingRoutes)
-app.use('/payment',paymentRoutes)
-app.use('/bus',busRoutes)
-app.use('/trip',tripRoutes)
-app.use('/review',reviewRoutes)
+app.use("/api", routes);
+app.use("/user", userRoutes);
+app.use("/booking", bookingRoutes);
+app.use("/payment", paymentRoutes);
+app.use("/bus", busRoutes);
+app.use("/trip", tripRoutes);
+app.use("/review", reviewRoutes);
 console.log("BACKEND SERVER STARTED");
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
-    console.log(`Server Started at ${port}`)
-})
+  console.log(`Server Started at ${port}`);
+});
