@@ -37,7 +37,7 @@ const Navbar = () => {
             }
         };
         getCartCount();
-    }, [isAuthenticated, cartCount]);
+    }, [isAuthenticated]);
 
     const handleClick = () => {
         setOpen(!open);

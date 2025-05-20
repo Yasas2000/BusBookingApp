@@ -40,8 +40,11 @@ const cartSlice = createSlice({
         state.fares.push(action.payload);
       },
       removeFare: (state, action: PayloadAction<string>) => {
-      state.fares = state.fares.filter(fare => fare._id !== action.payload);
-    },
+        state.fares = state.fares.filter(fare => fare._id !== action.payload);
+      },
+      removeMultipleFares: (state, action:PayloadAction<string[]>) => {
+        state.fares = state.fares.filter(fare => !action.payload.includes(fare._id));
+      }
     },
     extraReducers: (builder) => {
       builder
@@ -58,5 +61,5 @@ const cartSlice = createSlice({
     }
 })
 
-export const { addFare, removeFare } = cartSlice.actions;
+export const { addFare, removeFare, removeMultipleFares } = cartSlice.actions;
 export default cartSlice.reducer;
