@@ -7,7 +7,6 @@ const HomeContainer = () => {
     return (
         <>{/* HomeContainer component */}
             <Hero />
-            <Search />
         </>
     );
 };

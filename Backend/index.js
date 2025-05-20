@@ -9,6 +9,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const busRoutes = require("./routes/busRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const { setupBookingExpirationTask, setupBookingCompletionTask } = require('./utils/ScheduledTaks');
 
 const app = express();
 
@@ -21,12 +22,15 @@ const limiter = rateLimit({
 const cors = require("cors");
 
 // Example of setting CORS
-app.use(
-  cors({
-    origin: "http://localhost:5000", // Allow frontend domain
-    credentials: true, // Allow cookies to be sent
-  })
-);
+app.use(cors({
+    origin: "http://localhost:5000",  // Allow frontend domain
+    credentials: true                 // Allow cookies to be sent
+}));
+
+// Start the scheduled task
+//setupBookingExpirationTask();
+setupBookingCompletionTask();
+
 
 app.use(express.json());
 app.use(limiter);
@@ -38,6 +42,7 @@ app.use("/bus", busRoutes);
 app.use("/trip", tripRoutes);
 app.use("/review", reviewRoutes);
 console.log("BACKEND SERVER STARTED");
+
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {

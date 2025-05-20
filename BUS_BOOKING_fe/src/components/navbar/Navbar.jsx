@@ -21,7 +21,7 @@ const Navbar = () => {
     const navLinks = [
         { href: "/dashboard", label: "Home" }
     ]
-
+    console.log(role)
     // Fetch cart count when component mounts and when authentication changes
     useEffect(() => {
         const getCartCount = async () => {
@@ -110,6 +110,17 @@ const Navbar = () => {
                                 className="hover:text-violet-600 ease-in-out duration-300"
                             >
                                 Add Bus
+                            </Link>
+                        </li>
+                    )}
+                    {role === "admin" && (
+                        <li>
+                            <Link
+                                to="/register"
+                                onClick={handleClose}
+                                className="hover:text-violet-600 ease-in-out duration-300"
+                            >
+                                Add User
                             </Link>
                         </li>
                     )}

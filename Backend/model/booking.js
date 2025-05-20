@@ -12,7 +12,19 @@ const BookingSchema = new mongoose.Schema({
         type: String, 
         enum: ["pending", "confirmed", "canceled", "completed"], 
         default: "pending" 
-    }
+    },
+    created_at: { type: Date, default: Date.now },
+    expires_at: { type: Date, required: true }
     },{timestamps:true});
+
+BookingSchema.index(
+  { expires_at: 1 },
+  {
+    name: "Pending-Booking-TTL",
+    partialFilterExpression: { booking_status: "pending" },
+    expireAfterSeconds: 0
+  }
+);
+
 
 module.exports = mongoose.model("Booking", BookingSchema);

@@ -4,7 +4,7 @@ const Trip = require('../model/trip');
 
 exports.bookSeat = async (req, res) => {
   try {
-    const user_id = req.user.userId; // Assuming user ID is obtained from JWT token
+    const user_id = req.user.userId;
     const {bus_id, trip_id, departure_date, seatNumbers, price } = req.body;
 
     // Validate input
@@ -15,7 +15,6 @@ exports.bookSeat = async (req, res) => {
     console.log("Booking request:", req.body);
      
     const tripDate = moment.utc(departure_date, "YYYY-MM-DD");
-
     console.log("Parsed trip date:", tripDate);
     
     // Check if seats are available
@@ -27,11 +26,10 @@ exports.bookSeat = async (req, res) => {
     // Check if the selected seats are already booked
     const existingBookings = await Booking.find({
       trip_id,
-      departure_date: tripDate.toDate(), // Use the parsed date
+      departure_date: tripDate.toDate(),
       booking_status: { $ne: 'canceled' },
       seatNumbers: { $in: seatNumbers }
     });
-
     
     if (existingBookings.length > 0) {
       const bookedSeats = existingBookings.flatMap(booking => booking.seatNumbers);
@@ -42,6 +40,9 @@ exports.bookSeat = async (req, res) => {
       });
     }
     
+    // Set expiration time to 1 hour from now
+    const expiresAt = moment.utc().add(1, 'hour').toDate();
+    
     // Create new booking
     const booking = new Booking({
       user_id,
@@ -50,7 +51,8 @@ exports.bookSeat = async (req, res) => {
       departure_date: tripDate.toDate(),
       seatNumbers,
       price,
-      booking_status: 'pending'
+      booking_status: 'pending',
+      expires_at: expiresAt
     });
 
     console.log("Booking object:", booking);
@@ -60,7 +62,8 @@ exports.bookSeat = async (req, res) => {
     return res.status(201).json({
       message: 'Booking created successfully',
       bookingId: booking._id,
-      status: booking.booking_status
+      status: booking.booking_status,
+      expires_at: expiresAt
     });
     
   } catch (error) {
@@ -68,6 +71,7 @@ exports.bookSeat = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 
 exports.getBookedSeats = async (req, res) => {
@@ -91,19 +95,20 @@ exports.getBookedSeats = async (req, res) => {
   // Get pending bookings for the logged-in user
 exports.getPendingBookings = async (req, res) => {
   try {
-    const userId = req.user.userId; // Assuming user ID is obtained from JWT token
+    const user_id = req.user.userId;
     
-    const bookings = await Booking.find({
-      user_id: userId,
-      booking_status: 'pending'
-    }).populate('trip_id', 'from to departure');
+    const bookings = await Booking.find({ 
+      user_id, 
+      booking_status: 'pending' 
+    }).populate('trip_id');
     
     res.json(bookings);
   } catch (error) {
     console.error('Error fetching pending bookings:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Get all bookings for the logged-in user
 exports.getBookings = async (req, res) => {
