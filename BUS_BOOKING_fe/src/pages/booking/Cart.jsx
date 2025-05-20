@@ -1,4 +1,3 @@
-
 // src/pages/Bookings.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +6,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { loadStripe } from "@stripe/stripe-js";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeFare } from 'src/redux/cartSlice';
+import CountdownTimer from 'src/components/countDownTimer';
 
 const capitalize = (word) =>
   word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
@@ -16,7 +16,6 @@ const toUpperCaseLettersOnly = (str) =>
 const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const { fetchCartCount } = useCart();
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
   const bookings = useSelector((state) => state.cart.fares);
@@ -25,44 +24,49 @@ const Cart = () => {
   useEffect(() => {
     fetchBookings();
     // Refresh bookings every minute to keep status updated
-    const intervalId = setInterval(fetchBookings, 600000);
+    const intervalId = setInterval(fetchBookings, 60000);
     return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
   }, [bookings]);
 
   useEffect(() => {
-    fetchCartCount();
-  }, [total]);
-
-  useEffect(() => {
-    fetchCartCount();
-  }, [total]);
-
-  const calculateTotal = () => {
-    const totalPrice = bookings
-      .filter(booking => selectedBookings.includes(booking._id))
-      .reduce((sum, booking) => sum + parseInt(booking.price || 0), 0);
-    
-    setTotal(totalPrice);
-  };
-
-  useEffect(() => {
     calculateTotal();
-  }, [selectedBookings]);
+  }, [selectedBookings, bookings]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
       const response = await axios.get("/booking/pending");
+<<<<<<< HEAD
       setSelectedBookings(response.data.map((booking) => booking._id));
       const totalPrice = response.data.reduce((sum, booking) => {
         return sum + parseInt(booking.price || 0);
       }, 0);
       setTotal(totalPrice);
+=======
+      
+      // Filter out any bookings that might have expired on the server
+      const validBookings = response.data.filter(booking => 
+        booking.booking_status === 'pending' && new Date(booking.expires_at) > new Date()
+      );
+      
+      setSelectedBookings(validBookings.map((booking) => booking._id));
+>>>>>>> bdbaad0 (fixed conflicts)
       setLoading(false);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       setLoading(false);
     }
+  };
+
+  const calculateTotal = () => {
+    const totalPrice = bookings
+      .filter((booking) => selectedBookings.includes(booking._id))
+      .reduce((sum, booking) => sum + parseInt(booking.price || 0), 0);
+    setTotal(totalPrice);
   };
 
   const handleDelete = async (bookingId) => {
@@ -75,6 +79,14 @@ const Cart = () => {
     } catch (error) {
       console.error("Error canceling booking:", error);
     }
+  };
+
+  const handleBookingExpired = (bookingId) => {
+    // Remove expired booking from selected bookings
+    setSelectedBookings(prev => prev.filter(id => id !== bookingId));
+    
+    // Remove from redux store
+    dispatch(removeFare(bookingId));
   };
 
   const handleSelectBooking = (bookingId) => {
@@ -159,17 +171,18 @@ const Cart = () => {
             <input
               type="checkbox"
               className="w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500"
-              checked={selectedBookings.length === bookings.length}
+              checked={selectedBookings.length === bookings.length && bookings.length > 0}
               onChange={handleSelectAll}
             />
             <span className="ml-2 text-sm font-medium">Select All</span>
           </div>
 
           {/* Column headers - Desktop */}
-          <div className="hidden sm:grid grid-cols-5 mb-4 text-sm font-semibold text-gray-700">
+          <div className="hidden sm:grid sm:grid-cols-6 mb-4 text-sm font-semibold text-gray-700">
             <div></div>
             <div>Bus</div>
             <div>Route</div>
+            <div className="text-center">Time Left</div>
             <div className="text-right">Price</div>
             <div className="text-center">Actions</div>
           </div>
@@ -190,7 +203,7 @@ const Cart = () => {
                 className="border-b border-gray-200 dark:border-gray-700 py-4"
               >
                 {/* Desktop View */}
-                <div className="hidden sm:grid sm:grid-cols-5 items-center">
+                <div className="hidden sm:grid sm:grid-cols-6 items-center">
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -221,6 +234,14 @@ const Cart = () => {
                       Seats: {booking.seatNumbers.length} (
                       {booking.seatNumbers.join(", ")})
                     </p>
+                  </div>
+                  
+                  {/* Countdown Timer */}
+                  <div className="text-center">
+                    <CountdownTimer 
+                      expiresAt={booking.expires_at} 
+                      onExpire={() => handleBookingExpired(booking._id)}
+                    />
                   </div>
 
                   <div className="text-right font-bold text-lg sm:text-xl">
@@ -274,6 +295,14 @@ const Cart = () => {
                         Seats: {booking.seatNumbers.length} (
                         {booking.seatNumbers.join(", ")})
                       </p>
+                      {/* Mobile countdown timer */}
+                      <div className="mt-1">
+                        <span className="text-xs text-gray-500 mr-2">Expires in:</span>
+                        <CountdownTimer 
+                          expiresAt={booking.expires_at} 
+                          onExpire={() => handleBookingExpired(booking._id)}
+                        />
+                      </div>
                     </div>
                   </div>
 

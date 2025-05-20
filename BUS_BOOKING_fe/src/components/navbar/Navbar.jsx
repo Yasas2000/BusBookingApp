@@ -21,7 +21,7 @@ const Navbar = () => {
     const navLinks = [
         { href: "/dashboard", label: "Home" }
     ]
-
+    console.log(role)
     // Fetch cart count when component mounts and when authentication changes
     useEffect(() => {
         const getCartCount = async () => {

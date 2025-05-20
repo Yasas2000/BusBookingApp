@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { UserType } from "src/types/userType";
 import { useSelector } from "react-redux";
 import { useToast } from "src/utils/useToast";
+import { getRoleFromToken } from "./AuthUtils";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Register() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(false);
-  const role = useSelector((state: any) => state.user?.user?.user?.role);
+  const role = getRoleFromToken();
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

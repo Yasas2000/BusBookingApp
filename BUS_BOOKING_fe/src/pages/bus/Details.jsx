@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Bus from "src/assets/bus9.png";
 import { FaStar } from "react-icons/fa6";
@@ -85,7 +85,6 @@ const Details = () => {
       
       if (response.data) {
         successToast('Booking successful!');
-        incrementCartCount();
         
         // Clear the saved trip after successful booking
         sessionStorage.removeItem('selectedTrip');

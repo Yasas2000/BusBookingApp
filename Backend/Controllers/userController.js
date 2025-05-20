@@ -39,7 +39,7 @@ exports.loginUser = async (req, res) => {
         payload.busId = user.bus_id;
       }
   
-      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+      const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '50m' });
       const refreshToken = jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET, { expiresIn: '7d' });
   
       res.cookie("refreshToken", refreshToken, {

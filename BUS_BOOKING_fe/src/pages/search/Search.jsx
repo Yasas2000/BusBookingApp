@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useToast } from "src/utils/useToast";
+import { locations } from "src/data/location";
 
 const capitalize = (word) => word?.charAt(0)?.toUpperCase() + word?.slice(1)?.toLowerCase();
 const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
@@ -11,7 +12,7 @@ const Search = () => {
   const location = useLocation();
   const { errorToast, successToast } = useToast();
   
-  // State for min date and time (removed duplicates)
+  // State for min date and time
   const [minDate, setMinDate] = useState('');
   const [minTime, setMinTime] = useState('');
   
@@ -68,19 +69,38 @@ const Search = () => {
   };
 
   // Function to update minimum time (3 hours from now)
-  const updateMinTime = () => {
-    const now = new Date();
+  // Function to update minimum time (3 hours from now)
+const updateMinTime = () => {
+  const now = new Date();
+  
+  // Add 3 hours to current time
+  now.setHours(now.getHours() + 3);
+  
+  // Format as HH:MM
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const threeHoursLater = `${hours}:${minutes}`;
+  
+  // Check if we've crossed midnight
+  const currentHour = new Date().getHours();
+  const calculatedHour = now.getHours();
+  const crossedMidnight = currentHour > calculatedHour;
+  
+  setMinTime(threeHoursLater);
+  
+  if (crossedMidnight) {
+    // If we crossed midnight, we need to select the next day
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
     
-    // Add 3 hours to current time
-    now.setHours(now.getHours() + 3);
-    
-    // Format as HH:MM
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const threeHoursLater = `${hours}:${minutes}`;
-    
-    setMinTime(threeHoursLater);
-    
+    // Update the date to tomorrow and reset time
+    setForm(prev => ({
+      ...prev,
+      date: tomorrowStr,
+      time: "00:00"
+    }));
+  } else {
     // If current time selection is earlier than min time, update it
     if (form.time && form.time < threeHoursLater) {
       setForm(prev => ({
@@ -88,7 +108,9 @@ const Search = () => {
         time: threeHoursLater
       }));
     }
-  };
+  }
+};
+
 
   // Effect to handle success message and auto-search
   useEffect(() => {
@@ -206,59 +228,83 @@ const Search = () => {
     }
 
     try {
+      // Flatten the routes array to handle any nesting structure
+      const flattenedRoutes = [];
+      
+      // Handle different possible data structures
+      const processRoutes = (data, depth = 0) => {
+        if (!data) return;
+        
+        if (Array.isArray(data)) {
+          if (depth === 3) {
+            // We're at the bus level, add all buses
+            flattenedRoutes.push(...data);
+          } else {
+            // Continue flattening
+            data.forEach(item => processRoutes(item, depth + 1));
+          }
+        } else if (typeof data === 'object' && data.bus_id) {
+          // This is a single bus object
+          flattenedRoutes.push(data);
+        }
+      };
+      
+      processRoutes(routes);
+      
+      // If we couldn't flatten properly, try a different approach
+      if (flattenedRoutes.length === 0) {
+        // Try to extract buses directly
+        if (Array.isArray(routes)) {
+          routes.forEach(route => {
+            if (route && typeof route === 'object' && route.bus_id) {
+              flattenedRoutes.push(route);
+            }
+          });
+        } else if (routes && typeof routes === 'object' && routes.bus_id) {
+          flattenedRoutes.push(routes);
+        }
+      }
+      
       return (
         <div className="mt-12 space-y-6">
-          {routes.map((outerGroup, i) => {
-            if (!Array.isArray(outerGroup)) return null;
+          <div className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4">
+            <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+              Available Routes
+            </h3>
             
-            return outerGroup.map((group, j) => {
-              if (!Array.isArray(group)) return null;
-              
-              return group.map((route, k) => {
-                if (!Array.isArray(route)) return null;
-                
-                return (
-                  <div
-                    key={`${i}-${j}-${k}`}
-                    className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4"
-                  >
-                    <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                      Route {k + 1}
-                    </h3>
-
-                    {route.map((bus, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col md:flex-row md:items-center md:justify-between border border-neutral-300 dark:border-neutral-800 p-4 rounded-md bg-neutral-50 dark:bg-neutral-800/50 space-y-3 md:space-y-0"
-                      >
-                        <div className="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
-                          <p>
-                            🚌 <strong>{toUpperCaseLettersOnly(bus.bus_id)}</strong> -{" "}
-                            <span className="capitalize">{capitalize(bus.from)}</span> →{" "}
-                            <span className="capitalize">{capitalize(bus.to)}</span>
-                          </p>
-                          <p>
-                            Departure: <span className="font-medium">{bus.departure}</span> | Arrival:{" "}
-                            <span className="font-medium">{bus.arrival}</span>
-                          </p>
-                          <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
-                        </div>
-
-                        <div>
-                          <button
-                            className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
-                            onClick={() => handleBooking(bus)}
-                          >
-                            Book Now
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+            {flattenedRoutes.length > 0 ? (
+              flattenedRoutes.map((bus, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col md:flex-row md:items-center md:justify-between border border-neutral-300 dark:border-neutral-800 p-4 rounded-md bg-neutral-50 dark:bg-neutral-800/50 space-y-3 md:space-y-0"
+                >
+                  <div className="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
+                    <p>
+                      🚌 <strong>{toUpperCaseLettersOnly(bus.bus_id)}</strong> -{" "}
+                      <span className="capitalize">{capitalize(bus.from)}</span> →{" "}
+                      <span className="capitalize">{capitalize(bus.to)}</span>
+                    </p>
+                    <p>
+                      Departure: <span className="font-medium">{bus.departure}</span> | Arrival:{" "}
+                      <span className="font-medium">{bus.arrival}</span>
+                    </p>
+                    <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
                   </div>
-                );
-              });
-            });
-          })}
+
+                  <div>
+                    <button
+                      className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
+                      onClick={() => handleBooking(bus)}
+                    >
+                      Book Now
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center py-4 text-gray-500">No routes found matching your criteria.</p>
+            )}
+          </div>
         </div>
       );
     } catch (error) {
@@ -310,10 +356,16 @@ const Search = () => {
               value={form.from}
               className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none"
             >
-              <option value="">Select Location</option>
-              <option value="matara">Matara</option>
-              <option value="galle">Galle</option>
-              <option value="kandy">Kandy</option>
+              <option value="">Select location</option>
+              {locations.map(location => (
+                <option 
+                  key={location.value} 
+                  value={location.value}
+                  disabled={location.value === form.to} // Disable same location as "from"
+                >
+                  {location.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -328,10 +380,16 @@ const Search = () => {
               value={form.to}
               className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none"
             >
-              <option value="">Select Location</option>
-              <option value="colombo">Colombo</option>
-              <option value="galle">Galle</option>
-              <option value="jaffna">Jaffna</option>
+              <option value="">Select location</option>
+              {locations.map(location => (
+                <option 
+                  key={location.value} 
+                  value={location.value}
+                  disabled={location.value === form.from} // Disable same location as "from"
+                >
+                  {location.label}
+                </option>
+              ))}
             </select>
           </div>
 

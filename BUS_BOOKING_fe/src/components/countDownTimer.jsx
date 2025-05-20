@@ -9,7 +9,6 @@ const CountdownTimer = ({ expiresAt, onExpire }) => {
     const calculateTimeLeft = () => {
       const now = new Date();
       const expirationTime = new Date(expiresAt);
-      console.log('Expiration Time:', expiresAt);
       const difference = expirationTime - now;
       
       if (difference <= 0) {
