@@ -145,6 +145,79 @@ exports.findMultiLegRoutes = async (req, res) => {
     }
 };
 
+const findRoutesForBus = async (bus_id, tripDateStr) => {
+    const tripDate = moment.utc(tripDateStr, "YYYY-MM-DD");
+
+    // First check if bus exists
+    const bus = await Bus.findById(bus_id);
+    if (!bus) {
+        throw new Error("Bus not found");
+    }
+
+    const capacity = bus.capacity || 0;
+    const busPlateNumber = bus.bus_id; // This is the plate number
+
+    // Find trips using the plate number
+    const trips = await Trip.find({ bus_id: busPlateNumber });
+    
+    // Common bus details that don't need to be repeated for each route
+    const busDetails = {
+        bus_id: busPlateNumber,
+        capacity,
+        fare: bus.fare
+    };
+    
+    const routes = [];
+
+    for (let trip of trips) {
+        const tripDepTime = moment.utc(trip.departure);
+        const tripArrTime = moment.utc(trip.arrival);
+
+        const tripDepTimeOnly = moment({ hour: tripDepTime.hour(), minute: tripDepTime.minute() });
+        const tripArrTimeOnly = moment({ hour: tripArrTime.hour(), minute: tripArrTime.minute() });
+
+        // Simple check for display purposes
+        if (tripArrTimeOnly.isBefore(tripDepTimeOnly)) {
+            tripArrTimeOnly.add(1, 'day');
+        }
+
+        const result = await Booking.aggregate([
+            {
+                $match: {
+                    trip_id: trip._id,
+                    booking_status: { $in: ["pending", "confirmed"] },
+                    departure_date: tripDate.toDate()
+                }
+            },
+            {
+                $project: {
+                    seatCount: { $size: "$seatNumbers" }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSeats: { $sum: "$seatCount" }
+                }
+            }
+        ]);
+
+        const bookedSeats = result.length > 0 ? result[0].totalSeats : 0;
+
+        routes.push({
+            trip_id: trip._id,
+            from: trip.from,
+            to: trip.to,
+            departure: tripDepTimeOnly.format("HH:mm"),
+            arrival: tripArrTimeOnly.format("HH:mm"),
+            bookedSeats
+        });
+    }
+
+    // Return both the bus details and the routes
+    return { busDetails, routes };
+};
+
 
 exports.getRoutesForBus = async (req, res) => {
     try {
