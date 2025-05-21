@@ -18,12 +18,9 @@ const Search = () => {
   
   // Initialize form with values from location state or sessionStorage
   const [form, setForm] = useState(() => {
-    // Check if we have search params from navigation state
     if (location.state?.searchParams) {
       return location.state.searchParams;
     }
-    
-    // Otherwise check sessionStorage
     const savedForm = sessionStorage.getItem('searchForm');
     return savedForm ? JSON.parse(savedForm) : {
       from: "",
@@ -46,10 +43,8 @@ const Search = () => {
   // Update min date and time when form.date changes
   useEffect(() => {
     if (form.date === minDate) {
-      // If selected date is today, enforce min time
       updateMinTime();
     } else if (form.date && form.date > minDate) {
-      // If selected date is in the future, no min time restriction
       setMinTime('');
     }
   }, [form.date, minDate, form.time]);
@@ -57,76 +52,55 @@ const Search = () => {
   // Function to update minimum date and time
   const updateMinDateTime = () => {
     const now = new Date();
-    // Set min date to today in YYYY-MM-DD format
     const today = new Intl.DateTimeFormat('en-CA').format(now);
     setMinDate(today);
-    
-    // If the current date is already selected, update min time
     if (!form.date || form.date === today) {
       updateMinTime();
     }
   };
 
   // Function to update minimum time (3 hours from now)
-  // Function to update minimum time (3 hours from now)
-const updateMinTime = () => {
-  const now = new Date();
-  
-  // Add 3 hours to current time
-  now.setHours(now.getHours() + 3);
-  
-  // Format as HH:MM
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const threeHoursLater = `${hours}:${minutes}`;
-  
-  // Check if we've crossed midnight
-  const currentHour = new Date().getHours();
-  const calculatedHour = now.getHours();
-  const crossedMidnight = currentHour > calculatedHour;
-  
-  setMinTime(threeHoursLater);
-  
-  if (crossedMidnight) {
-    // If we crossed midnight, we need to select the next day
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = new Intl.DateTimeFormat('en-CA').format(tomorrow);
-    
-    // Update the date to tomorrow and reset time
-    setForm(prev => ({
-      ...prev,
-      date: tomorrowStr,
-      time: "00:00"
-    }));
-  } else {
-    // If current time selection is earlier than min time, update it
-    if (form.time && form.time < threeHoursLater) {
+  const updateMinTime = () => {
+    const now = new Date();
+    now.setHours(now.getHours() + 3);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const threeHoursLater = `${hours}:${minutes}`;
+    const currentHour = new Date().getHours();
+    const calculatedHour = now.getHours();
+    const crossedMidnight = currentHour > calculatedHour;
+    setMinTime(threeHoursLater);
+
+    if (crossedMidnight) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = new Intl.DateTimeFormat('en-CA').format(tomorrow);
       setForm(prev => ({
         ...prev,
-        time: threeHoursLater
+        date: tomorrowStr,
+        time: "00:00"
       }));
+    } else {
+      if (form.time && form.time < threeHoursLater) {
+        setForm(prev => ({
+          ...prev,
+          time: threeHoursLater
+        }));
+      }
     }
-  }
-};
-
+  };
 
   // Effect to handle success message and auto-search
   useEffect(() => {
-    // Show success message if passed from details page
     if (location.state?.success) {
       setMessage({
         type: 'success',
         text: location.state.message
       });
-      
-      // Clear the message after 5 seconds
       const timer = setTimeout(() => {
         setMessage(null);
-        // Also clear the location state after showing the message
         window.history.replaceState({}, document.title);
       }, 5000);
-      
       return () => clearTimeout(timer);
     }
   }, [location.state]);
@@ -134,7 +108,6 @@ const updateMinTime = () => {
   // Auto-search if we have form data from redirect, but only once
   useEffect(() => {
     const shouldSearch = form.from && form.to && form.date && form.time && initialLoad;
-    
     if (shouldSearch) {
       const fetchRoutes = async () => {
         setLoading(true);
@@ -146,7 +119,6 @@ const updateMinTime = () => {
             tripDateStr: form.date,
             maxTransfers: 3,
           });
-  
           const routesData = response.data.routes || [];
           setRoutes(routesData);
         } catch (error) {
@@ -156,11 +128,8 @@ const updateMinTime = () => {
           setInitialLoad(false);
         }
       };
-      
       fetchRoutes();
     } else if (initialLoad) {
-      // If we don't have complete form data but it's initial load,
-      // still mark initial load as complete
       setInitialLoad(false);
     }
   }, [form.from, form.to, form.date, form.time, initialLoad]);
@@ -180,14 +149,11 @@ const updateMinTime = () => {
       errorToast("Please fill all fields");
       return;
     }
-
-    // Check if date is today and time is valid
     const today = new Date().toISOString().split('T')[0];
     if (date === today && time < minTime) {
       errorToast("Please select a time at least 3 hours from today date");
       return;
     }
-
     setLoading(true);
     try {
       const response = await axios.post("/trip/find-trip", {
@@ -197,10 +163,8 @@ const updateMinTime = () => {
         tripDateStr: date,
         maxTransfers: 3,
       });
-      
       const routesData = response.data.routes || [];
       setRoutes(routesData);
-      
       if (Array.isArray(routesData) && routesData.length === 0) {
         errorToast("No routes available");
       } else if (Array.isArray(routesData) && routesData.length > 0) {
@@ -215,71 +179,36 @@ const updateMinTime = () => {
   };
 
   const handleBooking = (trip) => {
-    // Add the date from the search form to the trip object
-    const tripWithDate = {
-      ...trip,
-      departureDate: form.date
-    };
-    
-    // Save the search form to sessionStorage before navigating
+    const tripWithDate = { ...trip, departureDate: form.date };
     sessionStorage.setItem('searchForm', JSON.stringify(form));
-    
     navigate('/detail', { state: tripWithDate });
   };
 
-  // Function to safely render routes with error handling
+  // Robust flattening and filtering for bus objects
   const renderRoutes = () => {
-    if (!routes || routes.length === 0) {
-      return null;
-    }
+  if (!routes || routes.length === 0) {
+    return null;
+  }
 
-    try {
-      // Flatten the routes array to handle any nesting structure
-      const flattenedRoutes = [];
-      
-      // Handle different possible data structures
-      const processRoutes = (data, depth = 0) => {
-        if (!data) return;
-        
-        if (Array.isArray(data)) {
-          if (depth === 3) {
-            // We're at the bus level, add all buses
-            flattenedRoutes.push(...data);
-          } else {
-            // Continue flattening
-            data.forEach(item => processRoutes(item, depth + 1));
-          }
-        } else if (typeof data === 'object' && data.bus_id) {
-          // This is a single bus object
-          flattenedRoutes.push(data);
-        }
-      };
-      
-      processRoutes(routes);
-      
-      // If we couldn't flatten properly, try a different approach
-      if (flattenedRoutes.length === 0) {
-        // Try to extract buses directly
-        if (Array.isArray(routes)) {
-          routes.forEach(route => {
-            if (route && typeof route === 'object' && route.bus_id) {
-              flattenedRoutes.push(route);
-            }
-          });
-        } else if (routes && typeof routes === 'object' && routes.bus_id) {
-          flattenedRoutes.push(routes);
-        }
-      }
-      
-      return (
-        <div className="mt-12 space-y-6">
-          <div className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4">
-            <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-              Available Routes
-            </h3>
-            
-            {flattenedRoutes.length > 0 ? (
-              flattenedRoutes.map((bus, index) => (
+  try {
+    return (
+      <div className="mt-12 space-y-6">
+        {routes.map((routeSet, routeIndex) => {
+          const busObjects = Array.isArray(routeSet)
+            ? routeSet.filter(obj => obj && typeof obj === 'object' && obj.bus_id)
+            : [];
+
+          if (busObjects.length === 0) return null;
+
+          return (
+            <div
+              key={routeIndex}
+              className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4"
+            >
+              <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+                Route {routeIndex + 1}
+              </h3>
+              {busObjects.map((bus, index) => (
                 <div
                   key={index}
                   className="flex flex-col md:flex-row md:items-center md:justify-between border border-neutral-300 dark:border-neutral-800 p-4 rounded-md bg-neutral-50 dark:bg-neutral-800/50 space-y-3 md:space-y-0"
@@ -296,7 +225,6 @@ const updateMinTime = () => {
                     </p>
                     <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
                   </div>
-
                   <div>
                     <button
                       className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
@@ -306,21 +234,20 @@ const updateMinTime = () => {
                     </button>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-center py-4 text-gray-500">No routes found matching your criteria.</p>
-            )}
-          </div>
-        </div>
-      );
-    } catch (error) {
-      console.error("Error rendering routes:", error);
-      return (
-        <div className="mt-12 p-6 bg-red-100 text-red-700 rounded-md">
-          <p>There was an error displaying the routes. Please try searching again.</p>
-        </div>
-      );
-    }
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  } catch (error) {
+    console.error("Error rendering routes:", error);
+    return (
+      <div className="mt-12 p-6 bg-red-100 text-red-700 rounded-md">
+        <p>There was an error displaying the routes. Please try searching again.</p>
+      </div>
+    );
+  }
   };
 
   return (
@@ -367,7 +294,7 @@ const updateMinTime = () => {
                 <option 
                   key={location.value} 
                   value={location.value}
-                  disabled={location.value === form.to} // Disable same location as "from"
+                  disabled={location.value === form.to}
                 >
                   {location.label}
                 </option>
@@ -391,7 +318,7 @@ const updateMinTime = () => {
                 <option 
                   key={location.value} 
                   value={location.value}
-                  disabled={location.value === form.from} // Disable same location as "from"
+                  disabled={location.value === form.from}
                 >
                   {location.label}
                 </option>

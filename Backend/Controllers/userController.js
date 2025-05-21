@@ -1,23 +1,64 @@
 const User = require("../model/user")
+const Bus = require("../model/bus")
 const bycrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 require('dotenv').config();
 
-exports.registerUser = async (req,res) =>{
-    const { name, email, mobile, password } = req.body;
-    const existingUser = await User.findOne({email});
-    if(existingUser){
-        return res.status(401).json({message: "User already have a account"});
+exports.registerUser = async (req, res) => {
+    try {
+        const { name, email, mobile, password, userType, busId } = req.body;
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(401).json({ message: "User already has an account" });
+        }
+        
+        // Determine role based on userType
+        const role = userType === "CONDUCTOR" ? "bus" : "user";
+        
+        // Hash the password
+        const hashedPassword = await bycrypt.hash(password, 10);
+        
+        // Create user data object
+        const userData = { 
+            name, 
+            email, 
+            mobile, 
+            password: hashedPassword,
+            role
+        };
+        
+        // Add busId if the user is a conductor
+        if (userType === "CONDUCTOR" && busId) {
+            try {
+                // Find the bus with the provided ID
+                console.log(busId)
+                const busDocument = await Bus.findOne({ bus_id: busId });
+                
+                // Validate if the bus exists
+                if (!busDocument) {
+                    return res.status(404).json({ message: "Bus not found with the provided ID" });
+                }
+                
+                // Add the bus ObjectId to the user data
+                userData.busId = busDocument._id;
+            } catch (error) {
+                console.error("Error finding bus:", error);
+                return res.status(500).json({ message: "Error validating bus ID" });
+            }
+        }
+
+        // Create and save the user
+        const user = new User(userData);
+        await user.save();
+        
+        res.json({ message: "User Registered" });
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({ message: "Registration failed" });
     }
-    const hashedPassword = await bycrypt.hash(password,10);
-    
-    const userData = { name, email, mobile, password: hashedPassword };
-
-    const user = new User(userData);
-    await user.save();
-
-    res.json({message:"User Registered"})
-}
+};
 
 exports.loginUser = async (req, res) => {
     try {
