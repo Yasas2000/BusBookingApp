@@ -179,7 +179,7 @@ const Search = () => {
   };
 
   const handleBooking = (trip) => {
-    const tripWithDate = { ...trip, departureDate: form.date };
+    const tripWithDate = { ...trip };
     sessionStorage.setItem('searchForm', JSON.stringify(form));
     navigate('/detail', { state: tripWithDate });
   };
