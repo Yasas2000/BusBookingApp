@@ -57,7 +57,6 @@ const Search = () => {
   // Function to update minimum date and time
   const updateMinDateTime = () => {
     const now = new Date();
-    console.log(now)
     // Set min date to today in YYYY-MM-DD format
     const today = new Intl.DateTimeFormat('en-CA').format(now);
     setMinDate(today);
@@ -179,6 +178,13 @@ const updateMinTime = () => {
     const { from, to, date, time } = form;
     if (!from || !to || !date || !time) {
       errorToast("Please fill all fields");
+      return;
+    }
+
+    // Check if date is today and time is valid
+    const today = new Date().toISOString().split('T')[0];
+    if (date === today && time < minTime) {
+      errorToast("Please select a time at least 3 hours from today date");
       return;
     }
 
