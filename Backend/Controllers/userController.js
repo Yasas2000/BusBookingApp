@@ -42,7 +42,7 @@ exports.registerUser = async (req, res) => {
                 }
                 
                 // Add the bus ObjectId to the user data
-                userData.busId = busDocument._id;
+                userData.bus_id = busDocument._id;
             } catch (error) {
                 console.error("Error finding bus:", error);
                 return res.status(500).json({ message: "Error validating bus ID" });
