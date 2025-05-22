@@ -3,9 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useToast } from "src/utils/useToast";
 import { locations } from "src/data/location";
-
-const capitalize = (word) => word?.charAt(0)?.toUpperCase() + word?.slice(1)?.toLowerCase();
-const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
+import { capitalize, toUpperCaseLettersOnly } from "src/utils/formattingUtils";
 
 const Search = () => {
   const navigate = useNavigate();

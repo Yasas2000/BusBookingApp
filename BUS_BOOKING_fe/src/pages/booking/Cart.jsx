@@ -4,14 +4,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { formatInTimeZone } from "date-fns-tz";
 import { loadStripe } from "@stripe/stripe-js";
-import { useDispatch, useSelector } from 'react-redux';
-import { removeFare } from 'src/redux/cartSlice';
-import CountdownTimer from 'src/components/countDownTimer';
-
-const capitalize = (word) =>
-  word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
-const toUpperCaseLettersOnly = (str) =>
-  str?.replace(/[a-z]/g, (c) => c.toUpperCase());
+import { useDispatch, useSelector } from "react-redux";
+import { removeFare } from "src/redux/cartSlice";
+import CountdownTimer from "src/components/countDownTimer";
+import { capitalize, toUpperCaseLettersOnly } from "src/utils/formattingUtils";
 
 const Cart = () => {
   const [loading, setLoading] = useState(true);
@@ -23,7 +19,7 @@ const Cart = () => {
 
   useEffect(() => {
     fetchBookings();
-    
+
     // Refresh bookings every minute to keep status updated
     const intervalId = setInterval(fetchBookings, 60000);
     return () => clearInterval(intervalId);
@@ -37,12 +33,14 @@ const Cart = () => {
     try {
       setLoading(true);
       const response = await axios.get("/booking/pending");
-      
+
       // Filter out any bookings that might have expired on the server
-      const validBookings = response.data.filter(booking => 
-        booking.booking_status === 'pending' && new Date(booking.expires_at) > new Date()
+      const validBookings = response.data.filter(
+        (booking) =>
+          booking.booking_status === "pending" &&
+          new Date(booking.expires_at) > new Date()
       );
-      
+
       setSelectedBookings(validBookings.map((booking) => booking._id));
       setLoading(false);
     } catch (error) {
@@ -72,8 +70,8 @@ const Cart = () => {
 
   const handleBookingExpired = (bookingId) => {
     // Remove expired booking from selected bookings
-    setSelectedBookings(prev => prev.filter(id => id !== bookingId));
-    
+    setSelectedBookings((prev) => prev.filter((id) => id !== bookingId));
+
     // Remove from redux store
     dispatch(removeFare(bookingId));
   };
@@ -160,7 +158,10 @@ const Cart = () => {
             <input
               type="checkbox"
               className="w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500"
-              checked={selectedBookings.length === bookings.length && bookings.length > 0}
+              checked={
+                selectedBookings.length === bookings.length &&
+                bookings.length > 0
+              }
               onChange={handleSelectAll}
             />
             <span className="ml-2 text-sm font-medium">Select All</span>
@@ -224,11 +225,11 @@ const Cart = () => {
                       {booking.seatNumbers.join(", ")})
                     </p>
                   </div>
-                  
+
                   {/* Countdown Timer */}
                   <div className="text-center">
-                    <CountdownTimer 
-                      expiresAt={booking.expires_at} 
+                    <CountdownTimer
+                      expiresAt={booking.expires_at}
                       onExpire={() => handleBookingExpired(booking._id)}
                     />
                   </div>
@@ -286,9 +287,11 @@ const Cart = () => {
                       </p>
                       {/* Mobile countdown timer */}
                       <div className="mt-1">
-                        <span className="text-xs text-gray-500 mr-2">Expires in:</span>
-                        <CountdownTimer 
-                          expiresAt={booking.expires_at} 
+                        <span className="text-xs text-gray-500 mr-2">
+                          Expires in:
+                        </span>
+                        <CountdownTimer
+                          expiresAt={booking.expires_at}
                           onExpire={() => handleBookingExpired(booking._id)}
                         />
                       </div>

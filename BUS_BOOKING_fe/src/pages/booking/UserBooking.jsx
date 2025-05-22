@@ -5,9 +5,7 @@ import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FaSort, FaSortUp, FaSortDown, FaStar } from 'react-icons/fa';
 import RatingPopup from 'src/components/rating/Rating';
-
-const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
-const toUpperCaseLettersOnly = (str) => str?.replace(/[a-z]/g, c => c.toUpperCase());
+import { capitalize, toUpperCaseLettersOnly } from "src/utils/formattingUtils";
 
 const UserBookings = () => {
   const [bookings, setBookings] = useState([]);

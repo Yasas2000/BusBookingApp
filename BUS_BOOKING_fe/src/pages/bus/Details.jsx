@@ -7,8 +7,8 @@ import axios from "axios";
 import { useToast } from "src/utils/useToast";
 import { useDispatch } from "react-redux";
 import { fetchCartData } from 'src/redux/cartSlice';
+import { capitalize, toUpperCaseLettersOnly} from "src/utils/formattingUtils";
 
-const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
 const Details = () => {
   const location = useLocation();
@@ -163,7 +163,7 @@ const Details = () => {
             <h1 className="text-2xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-50">
               {trip.busType || "Luxury"} Bus
               <span className="block md:inline text-sm md:text-base font-normal text-neutral-400 dark:text-neutral-500 md:ml-3">
-                ({trip.bus_id || "Bus Number Plate Number"})
+                ({toUpperCaseLettersOnly(trip.bus_id) || "Bus Number Plate Number"})
               </span>
             </h1>
             <div className="flex items-center gap-x-2">

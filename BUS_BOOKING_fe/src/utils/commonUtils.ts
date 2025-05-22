@@ -22,4 +22,4 @@ const setAuthDataInLocalStorage = (key: string, value: string) => {
 
 }
 
-  export {getBaseURL, fetchwhoAmI};
+export {getBaseURL, fetchwhoAmI};
