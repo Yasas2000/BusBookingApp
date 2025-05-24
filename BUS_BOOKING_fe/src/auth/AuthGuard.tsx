@@ -7,47 +7,47 @@ import axios from "axios";
 import { fetchWhoAmI, setIsAuthenticated, setUser, } from "src/redux/userSlice";
 
 export default function AuthGuard() {
-  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
-  const [loading, setLoading] = useState(true);
-  const navigate  = useNavigate();
-  const location = useLocation();
-  const dispatch = useDispatch<AppDispatch>();
+	const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+	const [loading, setLoading] = useState(true);
+	const navigate = useNavigate();
+	const location = useLocation();
+	const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-      const fetchUserData = async () => {
-        try {
-          const accessTokenAvailable = await isAccessTokenAvailable();
-          if (accessTokenAvailable) {
-            const isTokenExpired = await checkTokenExpiration();
-            if (isTokenExpired) {
-              const refreshToken = localStorage.getItem("refresh_token");
-              const response = await axios.post(`/user/refresh`, { refreshToken: refreshToken });
-              setAuthDetails(response.data);
-              dispatch(setIsAuthenticated(true));
-            } else if (accessTokenAvailable && isAuthenticated){
-              dispatch(setIsAuthenticated(true));
-            } else {
-              await dispatch(fetchWhoAmI());
-            }
-          }
-        } catch (error) {
-          removeAuthDetails();
-          navigate("/login", { replace: true });
-        } finally {
-          setLoading(false);
-        }
-      };
-    
-      fetchUserData();
-    }, [location.pathname]);
+	useEffect(() => {
+		const fetchUserData = async () => {
+			try {
+				const accessTokenAvailable = await isAccessTokenAvailable();
+				if (accessTokenAvailable) {
+					const isTokenExpired = await checkTokenExpiration();
+					if (isTokenExpired) {
+						const refreshToken = localStorage.getItem("refresh_token");
+						const response = await axios.post(`/user/refresh`, { refreshToken: refreshToken });
+						setAuthDetails(response.data);
+						dispatch(setIsAuthenticated(true));
+					} else if (accessTokenAvailable && isAuthenticated) {
+						dispatch(setIsAuthenticated(true));
+					} else {
+						await dispatch(fetchWhoAmI());
+					}
+				}
+			} catch (error) {
+				removeAuthDetails();
+				navigate("/login", { replace: true });
+			} finally {
+				setLoading(false);
+			}
+		};
 
-    if (loading) {
-      return <div>Loading...</div>;
-    }
+		fetchUserData();
+	}, [location.pathname]);
 
-      return isAuthenticated ? (
-        <Outlet />
-      ) : (
-        <Navigate to="/login" state={{ from: location }} replace />
-      );
+	if (loading) {
+		return <div>Loading...</div>;
+	}
+
+	return isAuthenticated ? (
+		<Outlet />
+	) : (
+		<Navigate to="/login" state={{ from: location }} replace />
+	);
 }

@@ -15,7 +15,7 @@ const seatLayouts = {
     [23, 24, null, null, 25, 26],
     [27, 28, null, null, 29, 30],
     [31, 32, null, null, 33, 34],
-    [35, 36, 37, 38, 39, 40]
+    [35, 36, 37, 38, 39, 40],
   ],
   48: [
     [null, null, null, null, 1, 2],
@@ -29,7 +29,7 @@ const seatLayouts = {
     [31, 32, null, null, 33, 34],
     [35, 36, null, null, 37, 38],
     [39, 40, null, null, 41, 42],
-    [43, 44, 45, 46, 47, 48]
+    [43, 44, 45, 46, 47, 48],
   ],
   56: [
     [null, null, null, null, 1, 2],
@@ -45,7 +45,7 @@ const seatLayouts = {
     [39, 40, null, null, 41, 42],
     [43, 44, null, null, 45, 46],
     [47, 48, null, null, 49, 50],
-    [51, 52, 53, 54, 55, 56]
+    [51, 52, 53, 54, 55, 56],
   ],
 };
 
@@ -56,9 +56,8 @@ const Seat = ({ seatNumber, isSelected, isBooked, onClick }) => {
 
   return seatNumber ? (
     <MdOutlineChair
-      className={`text-2xl sm:text-3xl -rotate-90 ${
-        isBooked ? "cursor-not-allowed" : "cursor-pointer"
-      } ${colorClass}`}
+      className={`text-2xl sm:text-3xl -rotate-90 ${isBooked ? "cursor-not-allowed" : "cursor-pointer"
+        } ${colorClass}`}
       onClick={onClick}
     />
   ) : (
@@ -66,7 +65,13 @@ const Seat = ({ seatNumber, isSelected, isBooked, onClick }) => {
   );
 };
 
-const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) => {
+const BusSeatLayout = ({
+  tripId,
+  tripDate,
+  capacity = 56,
+  fare,
+  onSeatSelect,
+}) => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookedSeats, setBookedSeats] = useState([]);
 
@@ -97,9 +102,8 @@ const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) 
         return;
       }
     }
-    
+
     setSelectedSeats(newSelectedSeats);
-    // Pass the selected seats to the parent component
     if (onSeatSelect) {
       onSeatSelect(newSelectedSeats);
     }
@@ -114,15 +118,13 @@ const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) 
       </h2>
 
       <div className="w-full flex flex-row lg:flex-row justify-center gap-8 sm:gap-8">
-        {/* Seat layout section - with overflow handling for small screens */}
+        {/* Seat layout section*/}
         <div className="w-auto">
           {/* Scrollable container for small screens */}
           <div className="overflow-x-auto pb-4">
-            <div className="mx-auto"> {/* Minimum width to prevent squishing */}
-              {/* Dashed line with steering wheel aligned right */}
+            <div className="mx-auto">
               <div className="w-max">
                 <div className="flex w-full items-start justify-between border-b-2 border-dashed border-neutral-300 dark:border-neutral-800">
-                  {/* Empty div to push wheel to the right */}
                   <div></div>
                   <GiSteeringWheel className="text-3xl sm:text-4xl text-violet-600 mr-1" />
                 </div>
@@ -155,7 +157,7 @@ const BusSeatLayout = ({ tripId, tripDate, capacity = 56, fare, onSeatSelect }) 
           </div>
         </div>
 
-        {/* Legend - horizontal on mobile, vertical on larger screens */}
+        {/* Legend */}
         <div className="flex flex-col lg:flex-col flex-wrap gap-4 sm:gap-3 justify-start lg:justify-start lg:w-40">
           <div className="flex items-center gap-x-2">
             <MdOutlineChair className="text-lg text-neutral-500 -rotate-90" />

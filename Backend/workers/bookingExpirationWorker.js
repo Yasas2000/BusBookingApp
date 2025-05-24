@@ -1,11 +1,10 @@
-// workers/bookingExpirationWorker.js
 const mongoose = require('mongoose');
 const Booking = require('../model/booking');
 require('dotenv').config();
 
 // Connect to MongoDB in the worker
-mongoose.connect(process.env.MONGO_URI,{
-    dbName: "bus_booking"
+mongoose.connect(process.env.MONGO_URI, {
+  dbName: "bus_booking"
 })
   .then(() => processExpiredBookings())
   .catch(err => {
@@ -18,27 +17,24 @@ async function processExpiredBookings() {
   try {
     const now = new Date();
     console.log(`Processing expired bookings at ${now.toISOString()}`);
-    
-    // Find and update all expired pending bookings
+
     const result = await Booking.updateMany(
-      { 
+      {
         booking_status: 'pending',
         expires_at: { $lt: now }
       },
-      { 
+      {
         $set: { booking_status: 'canceled' }
       }
     );
-    
+
     console.log(`Found ${result.matchedCount} expired bookings, updated ${result.modifiedCount}`);
-    
-    // Send result back to parent process
-    process.send({ 
-      success: true, 
-      count: result.modifiedCount 
+
+    process.send({
+      success: true,
+      count: result.modifiedCount
     });
-    
-    // Close connection and exit
+
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {

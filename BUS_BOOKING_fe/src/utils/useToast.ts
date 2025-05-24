@@ -10,5 +10,5 @@ export function useToast() {
         toast.error(message);
     }, [])
 
-    return {successToast, errorToast};
+    return { successToast, errorToast };
 }

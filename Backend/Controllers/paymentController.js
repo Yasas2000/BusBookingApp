@@ -7,14 +7,12 @@ const path = require('path');
 const fs = require('fs').promises;
 const handlebars = require('handlebars');
 
-// Set up the email template
 const getEmailTemplate = async () => {
   const templatePath = path.join(__dirname, '../templates/ticket-template.html');
   const source = await fs.readFile(templatePath, 'utf-8');
   return handlebars.compile(source);
 };
 
-// Configure email transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail', // or any other email service
@@ -29,7 +27,7 @@ const sendTicketEmail = async (booking, userEmail) => {
   try {
     const transporter = createTransporter();
     const template = await getEmailTemplate();
-    
+
     // Format date and time
     const departureDate = new Date(booking.departure_date);
     const formattedDate = departureDate.toLocaleDateString('en-US', {
@@ -38,11 +36,10 @@ const sendTicketEmail = async (booking, userEmail) => {
       month: 'long',
       day: 'numeric'
     });
-    
-    // Get departure and arrival times
+
     const departureTime = booking.trip_id.departure;
     const arrivalTime = booking.trip_id.arrival;
-    
+
     // Prepare data for the email template
     const emailData = {
       ticketId: booking._id,
@@ -54,11 +51,11 @@ const sendTicketEmail = async (booking, userEmail) => {
       arrivalTime: arrivalTime,
       seatNumbers: booking.seatNumbers.join(', '),
       totalPrice: booking.price,
-      logoUrl: 'https://bus-ease-frontend.vercel.app/assets/logo-BRVg03aY.png' // Replace with your actual logo URL
+      logoUrl: 'https://drive.google.com/file/d/1yN_vF69oREZfzNZLTOucbgQ86cxleWb_/view?usp=sharing'
     };
-    
+
     const htmlToSend = template(emailData);
-    
+
     const mailOptions = {
       from: '"Bus Ease" <bus.ease.lk.official@gmail.com>',
       to: userEmail,
@@ -72,7 +69,7 @@ const sendTicketEmail = async (booking, userEmail) => {
         }
       ]
     };
-    
+
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent: ' + info.response);
     return true;
@@ -107,7 +104,6 @@ const processPayment = async (req, res) => {
       throw new Error("No pending bookings found for payment.");
     }
 
-    // Create the payment
     const payment = new Payment({
       user_id: userId,
       payment_status: "Completed",
@@ -129,7 +125,6 @@ const processPayment = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    // Get user email from the database
     const email = req.user.email;
     const userEmail = email
 

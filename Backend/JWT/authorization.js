@@ -9,8 +9,7 @@ exports.authenticateToken = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: "Invalid Token" });
 
-    req.user = user; // Store user details in request object
-    //console.log(user)
+    req.user = user;
     next();
   });
 };

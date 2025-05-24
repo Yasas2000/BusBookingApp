@@ -6,7 +6,6 @@ exports.submitReview = async (req, res) => {
     const { booking_id, rating, comment } = req.body;
     const userId = req.user.userId; // From auth middleware
     
-    // Verify the booking exists and belongs to the user
     const booking = await Booking.findOne({ 
       _id: booking_id,
       user_id: userId,
@@ -17,13 +16,11 @@ exports.submitReview = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found or not eligible for review' });
     }
     
-    // Check if a review already exists
     const existingReview = await Review.findOne({ booking_id });
     if (existingReview) {
       return res.status(400).json({ message: 'You have already reviewed this trip' });
     }
     
-    // Create the review
     const review = new Review({
       user_id: userId,
       booking_id,

@@ -20,7 +20,7 @@ const Checkout = () => {
     return seatArray.length;
   }
 
-  const formatDateTime = (isoString)=> {
+  const formatDateTime = (isoString) => {
     const date = new Date(isoString);
 
     const year = date.getFullYear();
@@ -95,72 +95,72 @@ const Checkout = () => {
             </h2>
 
             {bookingData.map((booking) => (
-            <div className="space-y-8 pb-3">
-              <div className="space-y-4">
-                <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                 <span className="font-bold">TRIP ID:- {booking._id}</span> 
-                </h6>
-                <div>Trip date/time:- <span></span> {formatDateTime(booking?.trip_id?.departure)}</div>
-                <div className="w-full flex items-center gap-x-3">
-                  <div className="w-fit text-base">
-                    From:- <span className="ml-1 5">{booking.trip_id.from}</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="w-full h-[1px] border border-dashed border-neutral-400 dark:border-neutral-700/80"></div>
-                  </div>
-                  <div className="w-fit text-base">
-                    To:- <span className="ml-1 5">{booking?.trip_id?.to}</span>
-                  </div>
-                </div>
-                <div className="w-full flex items-center gap-x-3">
-                  <div className="w-fit text-base">
-                    Depart at:- 
-                    <span className="ml-1 5">
-                    {booking.trip_id?.departure ? new Date(booking.trip_id.departure).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true,
-                      })
-                    : ""}
-                  </span>
-                  </div>
-                </div>
+              <div className="space-y-8 pb-3">
                 <div className="space-y-4">
-                <div className="w-full flex items-center justify-between">
                   <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                    Total No. of Seats
+                    <span className="font-bold">TRIP ID:- {booking._id}</span>
                   </h6>
+                  <div>Trip date/time:- <span></span> {formatDateTime(booking?.trip_id?.departure)}</div>
+                  <div className="w-full flex items-center gap-x-3">
+                    <div className="w-fit text-base">
+                      From:- <span className="ml-1 5">{booking.trip_id.from}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="w-full h-[1px] border border-dashed border-neutral-400 dark:border-neutral-700/80"></div>
+                    </div>
+                    <div className="w-fit text-base">
+                      To:- <span className="ml-1 5">{booking?.trip_id?.to}</span>
+                    </div>
+                  </div>
+                  <div className="w-full flex items-center gap-x-3">
+                    <div className="w-fit text-base">
+                      Depart at:-
+                      <span className="ml-1 5">
+                        {booking.trip_id?.departure ? new Date(booking.trip_id.departure).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })
+                          : ""}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="w-full flex items-center justify-between">
+                      <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
+                        Total No. of Seats
+                      </h6>
 
-                  <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                    {getTotalSeats(booking.seatNumbers)}
-                  </h6>
-                </div>
+                      <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
+                        {getTotalSeats(booking.seatNumbers)}
+                      </h6>
+                    </div>
 
-                <div className="w-full flex items-center justify-between">
-                  <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                    Total amount per trip
-                  </h6>
+                    <div className="w-full flex items-center justify-between">
+                      <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
+                        Total amount per trip
+                      </h6>
 
-                  <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                    {booking?.price}
-                  </h6>
+                      <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
+                        {booking?.price}
+                      </h6>
+                    </div>
+                  </div>
                 </div>
               </div>
-              </div>
-            </div>
             ))
-            } 
-            <br/>
+            }
+            <br />
             <div className="w-full flex items-center justify-between">
-                  <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-bold">
-                    TOTAL AMOUNT TO BE PAID
-                  </h6>
+              <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-bold">
+                TOTAL AMOUNT TO BE PAID
+              </h6>
 
-                  <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
-                    {total}
-                  </h6>
-              </div>
-            <br/>
+              <h6 className="text-base text-neutral-700 dark:text-neutral-200 font-medium">
+                {total}
+              </h6>
+            </div>
+            <br />
             <button className="w-full px-8 h-12 bg-violet-600 text-neutral-50 text-base font-normal rounded-md flex items-center justify-center gap-x-2">
               Processed to Pay Now <FaArrowRightLong />
             </button>

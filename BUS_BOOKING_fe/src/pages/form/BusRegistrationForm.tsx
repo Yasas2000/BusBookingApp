@@ -1,4 +1,3 @@
-// src/pages/RegisterBusOperator.tsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +26,7 @@ interface BusFormData {
   busType: string;
   operatorName: string;
   operatorEmail: string;
-  operatorMobile: string; 
+  operatorMobile: string;
   operatorPassword: string;
   routes: Route[];
 }
@@ -49,7 +48,7 @@ export default function RegisterBusOperator() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  
+
   const [formData, setFormData] = useState<BusFormData>({
     bus_id: "",
     name: "",
@@ -59,7 +58,7 @@ export default function RegisterBusOperator() {
     busType: "standard",
     operatorName: "",
     operatorEmail: "",
-    operatorMobile: "", 
+    operatorMobile: "",
     operatorPassword: "",
     routes: []
   });
@@ -67,7 +66,6 @@ export default function RegisterBusOperator() {
   // Generate unique IDs for routes and time slots
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
-  // Add a new route
   const addRoute = () => {
     setFormData({
       ...formData,
@@ -83,7 +81,6 @@ export default function RegisterBusOperator() {
     });
   };
 
-  // Remove a route
   const removeRoute = (routeId: string) => {
     setFormData({
       ...formData,
@@ -91,7 +88,6 @@ export default function RegisterBusOperator() {
     });
   };
 
-  // Add a time slot to a route
   const addTimeSlot = (routeId: string) => {
     setFormData({
       ...formData,
@@ -114,7 +110,6 @@ export default function RegisterBusOperator() {
     });
   };
 
-  // Remove a time slot from a route
   const removeTimeSlot = (routeId: string, timeSlotId: string) => {
     setFormData({
       ...formData,
@@ -130,21 +125,17 @@ export default function RegisterBusOperator() {
     });
   };
 
-  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    // Clear validation error when field is edited
+
     if (validationErrors[name as keyof ValidationErrors]) {
       setValidationErrors({
         ...validationErrors,
         [name]: undefined
       });
     }
-    
-    // Special handling for fare to fix leading zero issue
+
     if (name === "fare") {
-      // Convert to number and back to string to remove leading zeros
       const numValue = value === "" ? "" : Number(value);
       setFormData({
         ...formData,
@@ -158,7 +149,6 @@ export default function RegisterBusOperator() {
     }
   };
 
-  // Handle route input changes
   const handleRouteChange = (routeId: string, field: string, value: string) => {
     setFormData({
       ...formData,
@@ -174,7 +164,6 @@ export default function RegisterBusOperator() {
     });
   };
 
-  // Handle time slot input changes
   const handleTimeSlotChange = (routeId: string, timeSlotId: string, field: string, value: string) => {
     setFormData({
       ...formData,
@@ -201,7 +190,7 @@ export default function RegisterBusOperator() {
   // Add reverse route (B to A) based on existing route (A to B)
   const addReverseRoute = (routeId: string) => {
     const originalRoute = formData.routes.find(route => route.id === routeId);
-    
+
     if (originalRoute && originalRoute.from && originalRoute.to) {
       setFormData({
         ...formData,
@@ -221,46 +210,39 @@ export default function RegisterBusOperator() {
   // Validate form data
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
-    
-    // Bus ID validation (remove dashes and make lowercase when checking)
+
     if (!formData.bus_id.trim()) {
       errors.bus_id = "Bus plate number is required";
     } else if (!/^[a-zA-Z0-9-]+$/.test(formData.bus_id)) {
       errors.bus_id = "Bus plate number can only contain letters, numbers and hyphens";
     }
-    
-    // Permit number validation
+
     if (!formData.permitNumber.trim()) {
       errors.permitNumber = "Permit number is required";
     }
-    
-    // Fare validation
+
     if (formData.fare === "" || Number(formData.fare) <= 0) {
       errors.fare = "Fare must be greater than 0";
     }
-    
-    // Email validation
+
     if (!formData.operatorEmail.trim()) {
       errors.operatorEmail = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.operatorEmail)) {
       errors.operatorEmail = "Please enter a valid email address";
     }
-    
-    // Mobile validation
+
     if (!formData.operatorMobile.trim()) {
       errors.operatorMobile = "Mobile number is required";
     } else if (!/^(?:\+94|0)[1-9][0-9]{8}$/.test(formData.operatorMobile)) {
       errors.operatorMobile = "Please enter a valid Sri Lankan mobile number";
     }
-    
-    // Password validation
+
     if (!formData.operatorPassword) {
       errors.operatorPassword = "Password is required";
     } else if (formData.operatorPassword.length < 6) {
       errors.operatorPassword = "Password must be at least 6 characters";
     }
-    
-    // Routes validation
+
     if (formData.routes.length === 0) {
       errors.routes = "Please add at least one route";
     } else {
@@ -285,7 +267,7 @@ export default function RegisterBusOperator() {
         }
       }
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -293,27 +275,25 @@ export default function RegisterBusOperator() {
   // Submit the form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       setError("Please fix the errors in the form");
       return;
     }
-    
+
     setLoading(true);
     setError("");
 
     try {
-      // Format the bus_id: remove hyphens and convert to lowercase
       const formattedData = {
         ...formData,
         bus_id: formData.bus_id.replace(/-/g, '').toLowerCase(),
         fare: Number(formData.fare) // Ensure fare is a number
       };
-      
+
       console.log("Form data:", formattedData);
-      // Submit data to API
       const response = await axios.post("/bus/register", formattedData);
-      
+
       alert("Bus operator registered successfully!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -327,17 +307,17 @@ export default function RegisterBusOperator() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 my-[12ch]">
       <h1 className="text-3xl font-bold text-center text-violet-600 mb-8">Register Bus Operator</h1>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <h2 className="text-xl font-semibold text-violet-600 col-span-full">Bus Details</h2>
-          
+
           <div>
             <label htmlFor="bus_id" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Bus Plate Number <span className="text-red-500">*</span>
@@ -357,7 +337,7 @@ export default function RegisterBusOperator() {
             )}
             <p className="mt-1 text-xs text-gray-500">Note: Hyphens will be removed and letters will be converted to lowercase when submitted</p>
           </div>
-          
+
           <div>
             <label htmlFor="permitNumber" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Permit Number <span className="text-red-500">*</span>
@@ -376,7 +356,7 @@ export default function RegisterBusOperator() {
               <p className="mt-1 text-sm text-red-500">{validationErrors.permitNumber}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="name" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Bus Name
@@ -391,7 +371,7 @@ export default function RegisterBusOperator() {
               placeholder="e.g., Luxury Express"
             />
           </div>
-          
+
           <div>
             <label htmlFor="busType" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Bus Type
@@ -410,7 +390,7 @@ export default function RegisterBusOperator() {
               <option value="ac">AC</option>
             </select>
           </div>
-          
+
           <div>
             <label htmlFor="capacity" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Capacity
@@ -427,7 +407,7 @@ export default function RegisterBusOperator() {
               <option value={56}>56 Seats</option>
             </select>
           </div>
-          
+
           <div>
             <label htmlFor="fare" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Base Fare (Rs.)
@@ -447,10 +427,10 @@ export default function RegisterBusOperator() {
             )}
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <h2 className="text-xl font-semibold text-violet-600 col-span-full">Operator Details</h2>
-          
+
           <div>
             <label htmlFor="operatorName" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Operator Name
@@ -465,7 +445,7 @@ export default function RegisterBusOperator() {
               placeholder="e.g., John Doe"
             />
           </div>
-          
+
           <div>
             <label htmlFor="operatorMobile" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Mobile Number <span className="text-red-500">*</span>
@@ -484,7 +464,7 @@ export default function RegisterBusOperator() {
               <p className="mt-1 text-sm text-red-500">{validationErrors.operatorMobile}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="operatorEmail" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Email <span className="text-red-500">*</span>
@@ -503,7 +483,7 @@ export default function RegisterBusOperator() {
               <p className="mt-1 text-sm text-red-500">{validationErrors.operatorEmail}</p>
             )}
           </div>
-          
+
           <div>
             <label htmlFor="operatorPassword" className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
               Password <span className="text-red-500">*</span>
@@ -523,7 +503,7 @@ export default function RegisterBusOperator() {
             )}
           </div>
         </div>
-        
+
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-violet-600">Routes & Time Slots</h2>
@@ -535,11 +515,11 @@ export default function RegisterBusOperator() {
               <FaPlus className="mr-2" /> Add Route
             </button>
           </div>
-          
+
           {validationErrors.routes && (
             <p className="mb-4 text-sm text-red-500">{validationErrors.routes}</p>
           )}
-          
+
           {formData.routes.length === 0 ? (
             <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
               <p className="text-gray-500">No routes added yet. Click "Add Route" to begin.</p>
@@ -567,7 +547,7 @@ export default function RegisterBusOperator() {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
@@ -586,7 +566,7 @@ export default function RegisterBusOperator() {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block mb-2 font-medium text-neutral-800 dark:text-neutral-100">
                         To
@@ -598,8 +578,8 @@ export default function RegisterBusOperator() {
                       >
                         <option value="">Select location</option>
                         {locations.map(location => (
-                          <option 
-                            key={location.value} 
+                          <option
+                            key={location.value}
                             value={location.value}
                             disabled={location.value === route.from} // Disable same location as "from"
                           >
@@ -609,7 +589,7 @@ export default function RegisterBusOperator() {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <h4 className="font-medium">Time Slots</h4>
@@ -621,7 +601,7 @@ export default function RegisterBusOperator() {
                         <FaPlus className="mr-1" /> Add Time Slot
                       </button>
                     </div>
-                    
+
                     {route.timeSlots.length === 0 ? (
                       <div className="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
                         <p className="text-gray-500">No time slots added yet. Click "Add Time Slot" to begin.</p>
@@ -641,9 +621,9 @@ export default function RegisterBusOperator() {
                                 className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-10 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
                               />
                             </div>
-                            
+
                             <FaArrowRight className="text-gray-400 mt-6" />
-                            
+
                             <div className="flex-1 min-w-[120px]">
                               <label className="block mb-1 text-sm font-medium text-neutral-800 dark:text-neutral-100">
                                 Arrival Time
@@ -655,7 +635,7 @@ export default function RegisterBusOperator() {
                                 className="w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-10 border border-neutral-200 dark:border-neutral-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600"
                               />
                             </div>
-                            
+
                             <button
                               type="button"
                               onClick={() => removeTimeSlot(route.id, slot.id)}
@@ -673,7 +653,7 @@ export default function RegisterBusOperator() {
             </div>
           )}
         </div>
-        
+
         <div className="flex justify-end">
           <button
             type="submit"

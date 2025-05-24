@@ -1,4 +1,3 @@
-// src/data/locations.js
 export const locations = [
   { value: "colombo", label: "Colombo" },
   { value: "kandy", label: "Kandy" },

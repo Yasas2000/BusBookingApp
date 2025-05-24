@@ -23,11 +23,11 @@ const initialState: IUserState = {
 export const fetchWhoAmI = createAsyncThunk<IUser>(
     "user/fetchWhoAmI",
     async () => {
-      const userEmail = await getUserEmailFromToken();
-      const response = await axios.get(`user/whoami?email=${userEmail}`);
-      return response.data as IUser;
+        const userEmail = await getUserEmailFromToken();
+        const response = await axios.get(`user/whoami?email=${userEmail}`);
+        return response.data as IUser;
     }
-  );
+);
 
 const userSlice = createSlice({
     name: 'user',

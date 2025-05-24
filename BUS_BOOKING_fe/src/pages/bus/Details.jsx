@@ -35,27 +35,16 @@ const Details = () => {
       if (savedTrip) {
         setTrip(JSON.parse(savedTrip));
       } else {
-        // No trip data available, redirect to search
         navigate('/search');
       }
     }
   }, [location.state, navigate]);
-
-  // Restore selected seats after login redirect
-  useEffect(() => {
-    const pendingSeats = sessionStorage.getItem('pendingSeats');
-    if (pendingSeats) {
-      setSelectedSeats(JSON.parse(pendingSeats));
-      sessionStorage.removeItem('pendingSeats');
-    }
-  }, []);
 
   const showBookingMessage = (type, text) => {
     setMessageType(type);
     setMessageText(text);
     setShowMessage(true);
     
-    // Hide message after 5 seconds
     setTimeout(() => {
       setShowMessage(false);
     }, 5000);
@@ -90,16 +79,12 @@ const Details = () => {
       if (response.data) {
         successToast('Booking successful!');
         
-        // Clear the saved trip after successful booking
         sessionStorage.removeItem('selectedTrip');
         
-        // Wait for message to be visible before redirecting
         setTimeout(() => {
-          // Get the search form from sessionStorage
           const searchForm = sessionStorage.getItem('searchForm');
           const searchParams = searchForm ? JSON.parse(searchForm) : null;
           
-          // Navigate back to search page with state
           navigate('/search', { 
             state: { 
               success: true,
@@ -111,8 +96,6 @@ const Details = () => {
       }
     } catch (error) {
       if (error.response?.status === 401) {
-        // Save current selection before redirecting
-        sessionStorage.setItem('pendingSeats', JSON.stringify(selectedSeats));
         navigate('/login', { state: { from: location.pathname } });
       } else {
         console.error('Booking failed:', error);
@@ -129,7 +112,6 @@ const Details = () => {
   
   return (
     <div className="w-full px-4 sm:px-7 md:px-16 lg:px-28 pt-[8ch] my-8 md:my-[2ch]">
-      {/* Success/Error Message */}
       {showMessage && (
         <div className="fixed top-[10ch] left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md mx-auto">
           <div className={`${messageType === 'success' ? 'bg-violet-600' : 'bg-red-500'} text-white rounded-lg shadow-lg p-4 flex items-center justify-center`}>
@@ -145,11 +127,8 @@ const Details = () => {
         </div>
       )}
       
-      {/* Main content grid - changes to single column on mobile */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
-        {/* Bus image and details section */}
         <div className="space-y-6 md:space-y-8">
-          {/* Image container with proper aspect ratio and centering */}
           <div className="flex justify-center">
             <div className="w-full max-w-md lg:max-w-none">
               <img
@@ -188,7 +167,6 @@ const Details = () => {
         {/* Trip details and booking section */}
         <div className="space-y-6 md:space-y-10">
           <div className="space-y-6">
-            {/* Destination card */}
             <div className="space-y-3 md:space-y-5">
               <h1 className="text-xl text-neutral-800 dark:text-neutral-100 font-medium">
                 Your Destination
@@ -206,7 +184,6 @@ const Details = () => {
               </div>
             </div>
 
-            {/* Departure Card */}
             <div className="space-y-3 md:space-y-5">
               <div className="w-full flex items-center gap-x-3">
                 <div className="w-fit text-base font-semibold">
@@ -217,7 +194,6 @@ const Details = () => {
             </div>
           </div>
 
-          {/* Seat Selection */}
           <div className="overflow-x-auto">
             <BusSeatLayout
               tripId={trip.trip_id}
@@ -228,7 +204,6 @@ const Details = () => {
             />
           </div>
 
-          {/* Checkout Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               className="w-full sm:w-fit bg-violet-600 text-neutral-50 font-medium text-base px-6 py-2 rounded-md hover:bg-violet-700 ease-in-out duration-300 text-center"

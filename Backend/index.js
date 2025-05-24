@@ -2,14 +2,13 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 
 const database = require("./Configurations/database");
-const routes = require("./routes/routes");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const busRoutes = require("./routes/busRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
-const { setupBookingExpirationTask, setupBookingCompletionTask } = require('./utils/ScheduledTaks');
+const { setupBookingExpirationTask, setupBookingCompletionTask } = require('./util/ScheduledTaks');
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
@@ -23,10 +22,9 @@ const limiter = rateLimit({
 
 const cors = require("cors");
 
-// Example of setting CORS
 app.use(cors({
-    origin: FRONTEND_URL,  // Allow frontend domain
-    credentials: true                 // Allow cookies to be sent
+  origin: FRONTEND_URL,  // Allow frontend domain
+  credentials: true      // Allow cookies to be sent
 }));
 
 app.options('*', cors());
@@ -39,7 +37,6 @@ app.options('*', cors());
 
 app.use(express.json());
 app.use(limiter);
-app.use("/api", routes);
 app.use("/user", userRoutes);
 app.use("/booking", bookingRoutes);
 app.use("/payment", paymentRoutes);

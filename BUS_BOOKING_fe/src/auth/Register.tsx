@@ -22,8 +22,8 @@ export default function Register() {
   const [submitError, setSubmitError] = useState('');
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState("user");
-  
-  useEffect(()=> {
+
+  useEffect(() => {
     if (isAccessTokenAvailable()) {
       setRole(getRoleFromToken());
     }
@@ -48,39 +48,39 @@ export default function Register() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     if (!formData.mobile.trim()) {
       newErrors.mobile = "Mobile number is required";
     } else if (!validateMobile(formData.mobile)) {
       newErrors.mobile = "Please enter a valid Sri Lankan mobile number";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     if (userType === UserType.CONDUCTOR && !formData.busId.trim()) {
       newErrors.busId = "Bus ID is required for conductors";
     } else if (userType === UserType.CONDUCTOR && !validateBusId(formData.busId.toUpperCase())) {
       newErrors.busId = "Please enter a valid bus ID (e.g., NA1234)";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,7 +91,7 @@ export default function Register() {
       ...formData,
       [name]: value
     });
-    
+
     // Clear the specific error when user types
     if (errors[name]) {
       setErrors({
@@ -104,13 +104,13 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError('');
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const payload = {
         userType,
@@ -138,13 +138,13 @@ export default function Register() {
           <h1 className="text-3xl font-bold text-center text-violet-600 mb-2">Create Account</h1>
           <p className="text-center text-neutral-600 dark:text-neutral-400">Join us for a better journey experience</p>
         </div>
-        
+
         {submitError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{submitError}</span>
           </div>
         )}
-        
+
         <form className="mt-8 space-y-6 bg-white dark:bg-neutral-800 p-8 rounded-lg shadow-md" onSubmit={handleSubmit}>
           {role === 'admin' && (
             <div className="mb-4">
@@ -187,9 +187,8 @@ export default function Register() {
                 type="text"
                 value={formData.name}
                 onChange={handleInputChange}
-                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                  errors.name ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.name ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                 placeholder="John Doe"
               />
               {errors.name && <p className="mt-1 text-red-500 text-sm">{errors.name}</p>}
@@ -205,9 +204,8 @@ export default function Register() {
                 type="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                  errors.email ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.email ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                 placeholder="example@email.com"
               />
               {errors.email && <p className="mt-1 text-red-500 text-sm">{errors.email}</p>}
@@ -223,9 +221,8 @@ export default function Register() {
                 type="tel"
                 value={formData.mobile}
                 onChange={handleInputChange}
-                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                  errors.mobile ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.mobile ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                 placeholder="+94 77 123 4567"
               />
               {errors.mobile && <p className="mt-1 text-red-500 text-sm">{errors.mobile}</p>}
@@ -242,9 +239,8 @@ export default function Register() {
                   type="text"
                   value={formData.busId}
                   onChange={handleInputChange}
-                  className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                    errors.busId ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                  className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.busId ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                   placeholder="NA1234"
                 />
                 {errors.busId && <p className="mt-1 text-red-500 text-sm">{errors.busId}</p>}
@@ -261,9 +257,8 @@ export default function Register() {
                 type="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                  errors.password ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.password ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                 placeholder="Enter password"
               />
               {errors.password && <p className="mt-1 text-red-500 text-sm">{errors.password}</p>}
@@ -279,9 +274,8 @@ export default function Register() {
                 type="password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${
-                  errors.confirmPassword ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
+                className={`w-full text-neutral-800 dark:text-neutral-100 bg-neutral-200/60 dark:bg-neutral-900/60 px-3 h-12 border ${errors.confirmPassword ? 'border-red-500' : 'border-neutral-200 dark:border-neutral-900'
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-violet-600`}
                 placeholder="Confirm password"
               />
               {errors.confirmPassword && <p className="mt-1 text-red-500 text-sm">{errors.confirmPassword}</p>}

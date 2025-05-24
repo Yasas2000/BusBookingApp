@@ -4,11 +4,11 @@ import Search from '../search/Search';
 
 
 const HomeContainer = () => {
-    return (
-        <>{/* HomeContainer component */}
-            <Hero />
-        </>
-    );
+  return (
+    <>{/* HomeContainer component */}
+      <Hero />
+    </>
+  );
 };
 
 export default HomeContainer;

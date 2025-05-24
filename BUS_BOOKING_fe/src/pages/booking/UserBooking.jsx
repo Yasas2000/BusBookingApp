@@ -1,4 +1,3 @@
-// src/pages/UserBookings.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -16,20 +15,24 @@ const UserBookings = () => {
   const [showRatingPopup, setShowRatingPopup] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const navigate = useNavigate();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    fetchBookings();
+    if (!hasFetched.current) {
+      fetchBookings();
+      hasFetched.current = true;
+    }
   }, []);
+
 
   useEffect(() => {
     // Apply filters and sorting
     let result = [...bookings];
-    
-    // Filter by status
+
     if (statusFilter !== 'all') {
       result = result.filter(booking => booking.booking_status === statusFilter);
     }
-    
+
     // Apply sorting
     if (sortConfig.key) {
       result.sort((a, b) => {
@@ -49,7 +52,7 @@ const UserBookings = () => {
         return 0;
       });
     }
-    
+
     setFilteredBookings(result);
   }, [bookings, sortConfig, statusFilter]);
 
@@ -75,8 +78,8 @@ const UserBookings = () => {
 
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return <FaSort className="ml-1 text-gray-400" />;
-    return sortConfig.direction === 'asc' ? 
-      <FaSortUp className="ml-1 text-violet-600" /> : 
+    return sortConfig.direction === 'asc' ?
+      <FaSortUp className="ml-1 text-violet-600" /> :
       <FaSortDown className="ml-1 text-violet-600" />;
   };
 
@@ -87,7 +90,7 @@ const UserBookings = () => {
   const handleReview = (bookingId) => {
     setSelectedBookingId(bookingId);
     setShowRatingPopup(true);
-};
+  };
 
   const formatDateTime = (dateString, timeString) => {
     if (!dateString) return 'Date not available';
@@ -114,7 +117,7 @@ const UserBookings = () => {
       canceled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
       completed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
     };
-    
+
     return (
       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClasses[status]}`}>
         {capitalize(status)}
@@ -129,7 +132,7 @@ const UserBookings = () => {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 my-[12ch]">
       <h1 className="text-3xl font-bold text-center text-violet-600 mb-8">My Bookings</h1>
-      
+
       {bookings.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-xl text-gray-600">You don't have any bookings yet</p>
@@ -155,23 +158,23 @@ const UserBookings = () => {
                 <option value="canceled">Canceled</option>
               </select>
             </div>
-            
+
             <div className="flex space-x-4">
-              <button 
-                onClick={() => handleSort('departure_date')} 
+              <button
+                onClick={() => handleSort('departure_date')}
                 className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-violet-600"
               >
                 Sort by Date {getSortIcon('departure_date')}
               </button>
-              <button 
-                onClick={() => handleSort('booking_status')} 
+              <button
+                onClick={() => handleSort('booking_status')}
                 className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-violet-600"
               >
                 Sort by Status {getSortIcon('booking_status')}
               </button>
             </div>
           </div>
-          
+
           {/* Column headers - Desktop */}
           <div className="hidden sm:grid grid-cols-5 p-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
             <div>Bus</div>
@@ -180,7 +183,7 @@ const UserBookings = () => {
             <div className="text-center">Status</div>
             <div className="text-center">Actions</div>
           </div>
-          
+
           {/* Bookings List */}
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredBookings.length === 0 ? (
@@ -198,26 +201,26 @@ const UserBookings = () => {
                         {booking.price ? `Rs. ${booking.price}` : ''}
                       </p>
                     </div>
-                    
+
                     <div className="text-sm">
                       <p className="font-medium">{capitalize(booking.trip_id?.from)} - {capitalize(booking.trip_id?.to)}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {formatDateTime(booking.departure_date, booking.trip_id?.departure)}
                       </p>
                     </div>
-                    
+
                     <div className="text-sm">
                       <p className="font-medium">{booking.seatNumbers.length} Seats</p>
                       <p className="text-xs text-gray-500">{booking.seatNumbers.join(', ')}</p>
                     </div>
-                    
+
                     <div className="flex justify-center">
                       {getStatusBadge(booking.booking_status)}
                     </div>
-                    
+
                     <div className="flex justify-center">
                       {booking.booking_status === 'pending' && (
-                        <button 
+                        <button
                           onClick={() => handlePayment(booking._id)}
                           className="px-4 py-1 bg-violet-600 text-white text-sm rounded-md hover:bg-violet-700 transition-colors"
                         >
@@ -225,7 +228,7 @@ const UserBookings = () => {
                         </button>
                       )}
                       {booking.booking_status === 'completed' && (
-                        <button 
+                        <button
                           onClick={() => handleReview(booking._id)}
                           className="px-4 py-1 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600 transition-colors flex items-center"
                         >
@@ -234,7 +237,7 @@ const UserBookings = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Mobile View */}
                   <div className="sm:hidden space-y-3">
                     <div className="flex justify-between items-start">
@@ -246,20 +249,20 @@ const UserBookings = () => {
                         {getStatusBadge(booking.booking_status)}
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-gray-500">
                       {formatDateTime(booking.departure_date, booking.trip_id?.departure)}
                     </div>
-                    
+
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-sm">Seats: {booking.seatNumbers.length} ({booking.seatNumbers.join(', ')})</p>
                         <p className="text-sm font-medium mt-1">{booking.price ? `Rs. ${booking.price}` : ''}</p>
                       </div>
-                      
+
                       <div>
                         {booking.booking_status === 'pending' && (
-                          <button 
+                          <button
                             onClick={() => handlePayment(booking._id)}
                             className="px-3 py-1 bg-violet-600 text-white text-xs rounded-md hover:bg-violet-700 transition-colors"
                           >
@@ -267,7 +270,7 @@ const UserBookings = () => {
                           </button>
                         )}
                         {booking.booking_status === 'completed' && (
-                          <button 
+                          <button
                             onClick={() => handleReview(booking._id)}
                             className="px-3 py-1 bg-yellow-500 text-white text-xs rounded-md hover:bg-yellow-600 transition-colors flex items-center"
                           >
@@ -281,21 +284,20 @@ const UserBookings = () => {
               ))
             )}
             {showRatingPopup && (
-              <RatingPopup 
-                bookingId={selectedBookingId} 
+              <RatingPopup
+                bookingId={selectedBookingId}
                 onClose={() => {
                   setShowRatingPopup(false);
                   setSelectedBookingId(null);
-                  // Optionally refresh bookings to update UI
                   fetchBookings();
-                }} 
+                }}
               />
             )}
           </div>
         </div>
       )}
     </div>
-    
+
   );
 };
 

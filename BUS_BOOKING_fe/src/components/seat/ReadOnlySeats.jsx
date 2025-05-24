@@ -15,7 +15,7 @@ const seatLayouts = {
     [23, 24, null, null, 25, 26],
     [27, 28, null, null, 29, 30],
     [31, 32, null, null, 33, 34],
-    [35, 36, 37, 38, 39, 40]
+    [35, 36, 37, 38, 39, 40],
   ],
   48: [
     [null, null, null, null, 1, 2],
@@ -29,7 +29,7 @@ const seatLayouts = {
     [31, 32, null, null, 33, 34],
     [35, 36, null, null, 37, 38],
     [39, 40, null, null, 41, 42],
-    [43, 44, 45, 46, 47, 48]
+    [43, 44, 45, 46, 47, 48],
   ],
   56: [
     [null, null, null, null, 1, 2],
@@ -45,7 +45,7 @@ const seatLayouts = {
     [39, 40, null, null, 41, 42],
     [43, 44, null, null, 45, 46],
     [47, 48, null, null, 49, 50],
-    [51, 52, 53, 54, 55, 56]
+    [51, 52, 53, 54, 55, 56],
   ],
 };
 
@@ -55,7 +55,11 @@ const Seat = ({ seatNumber, isBooked }) => {
   return seatNumber ? (
     <MdOutlineChair
       className={`text-2xl sm:text-3xl -rotate-90 cursor-default ${colorClass}`}
-      title={isBooked ? `Seat ${seatNumber} (Booked)` : `Seat ${seatNumber} (Available)`}
+      title={
+        isBooked
+          ? `Seat ${seatNumber} (Booked)`
+          : `Seat ${seatNumber} (Available)`
+      }
     />
   ) : (
     <div></div> // Placeholder for aisle
@@ -87,7 +91,11 @@ const ReadOnlyBusSeatLayout = ({ tripId, tripDate, capacity = 56, fare }) => {
   const layout = seatLayouts[capacity] || [];
 
   if (loading) {
-    return <div className="flex justify-center items-center h-24">Loading seat data...</div>;
+    return (
+      <div className="flex justify-center items-center h-24">
+        Loading seat data...
+      </div>
+    );
   }
 
   return (
@@ -97,17 +105,16 @@ const ReadOnlyBusSeatLayout = ({ tripId, tripDate, capacity = 56, fare }) => {
           Seat Layout
         </h2>
         <div className="text-sm">
-          <span className="font-bold">{bookedSeats.length}</span> of <span className="font-bold">{capacity}</span> seats booked
+          <span className="font-bold">{bookedSeats.length}</span> of{" "}
+          <span className="font-bold">{capacity}</span> seats booked
         </div>
       </div>
 
       <div className="w-full flex flex-col md:flex-row justify-center gap-8">
         {/* Seat layout section */}
         <div className="w-auto">
-          {/* Scrollable container */}
           <div className="overflow-x-auto pb-4">
             <div className="mx-auto">
-              {/* Dashed line with steering wheel */}
               <div className="w-max">
                 <div className="flex w-full items-start justify-between border-b-2 border-dashed border-neutral-300 dark:border-neutral-800">
                   <div></div>
@@ -160,8 +167,11 @@ const ReadOnlyBusSeatLayout = ({ tripId, tripDate, capacity = 56, fare }) => {
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <p className="font-medium mb-2">Booked Seats:</p>
           <div className="flex flex-wrap gap-2">
-            {bookedSeats.map(seat => (
-              <div key={seat} className="px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded text-sm">
+            {bookedSeats.map((seat) => (
+              <div
+                key={seat}
+                className="px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded text-sm"
+              >
                 {seat}
               </div>
             ))}

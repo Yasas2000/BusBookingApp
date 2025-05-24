@@ -1,53 +1,29 @@
-// src/pages/Bookings.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { formatInTimeZone } from "date-fns-tz";
 import { loadStripe } from "@stripe/stripe-js";
 import { useDispatch, useSelector } from "react-redux";
-import { removeFare } from "src/redux/cartSlice";
+import { removeFare, fetchCartData } from "src/redux/cartSlice";
 import CountdownTimer from "src/components/countDownTimer";
 import { capitalize, toUpperCaseLettersOnly } from "src/utils/formattingUtils";
 
 const Cart = () => {
-  const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [selectedBookings, setSelectedBookings] = useState([]);
   const navigate = useNavigate();
+  const loading = useSelector((state) => state.cart.loading);
   const bookings = useSelector((state) => state.cart.fares);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    fetchBookings();
-
-    // Refresh bookings every minute to keep status updated
-    const intervalId = setInterval(fetchBookings, 60000);
-    return () => clearInterval(intervalId);
-  }, []);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     calculateTotal();
   }, [selectedBookings, bookings]);
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get("/booking/pending");
-
-      // Filter out any bookings that might have expired on the server
-      const validBookings = response.data.filter(
-        (booking) =>
-          booking.booking_status === "pending" &&
-          new Date(booking.expires_at) > new Date()
-      );
-
-      setSelectedBookings(validBookings.map((booking) => booking._id));
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    handleSelectAll();
+  }, [bookings]);
 
   const calculateTotal = () => {
     const totalPrice = bookings
@@ -153,7 +129,6 @@ const Cart = () => {
         </div>
       ) : (
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden p-4 sm:p-6">
-          {/* Select All - Visible on both mobile and desktop */}
           <div className="flex items-center mb-4">
             <input
               type="checkbox"
@@ -285,7 +260,6 @@ const Cart = () => {
                         Seats: {booking.seatNumbers.length} (
                         {booking.seatNumbers.join(", ")})
                       </p>
-                      {/* Mobile countdown timer */}
                       <div className="mt-1">
                         <span className="text-xs text-gray-500 mr-2">
                           Expires in:
@@ -298,15 +272,13 @@ const Cart = () => {
                     </div>
                   </div>
 
-                  {/* Price and Delete button with proper alignment */}
                   <div className="grid grid-cols-2 items-center">
                     <div className="text-right">
                       <p
-                        className={`font-bold text-lg ${
-                          selectedBookings.includes(booking._id)
+                        className={`font-bold text-lg ${selectedBookings.includes(booking._id)
                             ? "text-violet-600"
                             : "text-gray-400"
-                        }`}
+                          }`}
                       >
                         {booking.price ||
                           booking.seatNumbers.length * booking.trip_id?.price ||
@@ -340,11 +312,10 @@ const Cart = () => {
           <button
             onClick={proceedToCheckout}
             disabled={selectedBookings.length === 0}
-            className={`w-full mt-6 py-3 text-white font-medium rounded-md transition-colors ${
-              selectedBookings.length > 0
+            className={`w-full mt-6 py-3 text-white font-medium rounded-md transition-colors ${selectedBookings.length > 0
                 ? "bg-violet-600 hover:bg-violet-700"
                 : "bg-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             Proceed to Checkout
           </button>

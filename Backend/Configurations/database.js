@@ -3,16 +3,16 @@ require('dotenv').config();
 
 const uri = process.env.MONGO_URI;
 
-mongoose.connect(uri,{
+mongoose.connect(uri, {
     dbName: "bus_booking"
 });
 const database = mongoose.connection;
 
-database.on('error', (error)=>{
+database.on('error', (error) => {
     console.log(error);
 })
 
-database.once('connected', ()=>{
+database.once('connected', () => {
     console.log('Database Connected');
 })
 

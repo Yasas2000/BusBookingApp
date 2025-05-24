@@ -3,20 +3,17 @@ const Bus = require("../model/bus");
 const Booking = require("../model/booking");
 const moment = require("moment-timezone");
 
-
-const parseTimeToLocalDate = (timeStr) => {
-    return moment.tz(timeStr, "HH:mm", "+5.30").toDate();
-};
-
-exports.insertTrip = async(req, res)=>{
-    try{const {bus_id, from, to , departure, arrival}= req.body;
-    let departure_time = moment.utc(departure, "HH:mm");
-    let arrival_time = moment.utc(arrival, "HH:mm");
-    const trip = new Trip({bus_id, from, to , departure:departure_time, arrival:arrival_time});
-    await trip.save();
-    res.json({message:"Trip is enterd",trip,departure_time})}catch(error){
+exports.insertTrip = async (req, res) => {
+    try {
+        const { bus_id, from, to, departure, arrival } = req.body;
+        let departure_time = moment.utc(departure, "HH:mm");
+        let arrival_time = moment.utc(arrival, "HH:mm");
+        const trip = new Trip({ bus_id, from, to, departure: departure_time, arrival: arrival_time });
+        await trip.save();
+        res.json({ message: "Trip is enterd", trip, departure_time })
+    } catch (error) {
         console.log(error)
-        res.status(500).json({ message:"Internal Server Error",error: error.message });
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 }
 
@@ -148,7 +145,6 @@ exports.findMultiLegRoutes = async (req, res) => {
 const findRoutesForBus = async (bus_id, tripDateStr) => {
     const tripDate = moment.utc(tripDateStr, "YYYY-MM-DD");
 
-    // First check if bus exists
     const bus = await Bus.findById(bus_id);
     if (!bus) {
         throw new Error("Bus not found");
@@ -157,16 +153,14 @@ const findRoutesForBus = async (bus_id, tripDateStr) => {
     const capacity = bus.capacity || 0;
     const busPlateNumber = bus.bus_id; // This is the plate number
 
-    // Find trips using the plate number
     const trips = await Trip.find({ bus_id: busPlateNumber });
-    
-    // Common bus details that don't need to be repeated for each route
+
     const busDetails = {
         bus_id: busPlateNumber,
         capacity,
         fare: bus.fare
     };
-    
+
     const routes = [];
 
     for (let trip of trips) {
@@ -214,7 +208,6 @@ const findRoutesForBus = async (bus_id, tripDateStr) => {
         });
     }
 
-    // Return both the bus details and the routes
     return { busDetails, routes };
 };
 
@@ -239,5 +232,5 @@ exports.getRoutesForBus = async (req, res) => {
     }
 };
 
-  
+
 

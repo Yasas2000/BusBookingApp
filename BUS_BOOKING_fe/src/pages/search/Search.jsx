@@ -4,29 +4,42 @@ import axios from "axios";
 import { useToast } from "src/utils/useToast";
 import { locations } from "src/data/location";
 import { capitalize, toUpperCaseLettersOnly } from "src/utils/formattingUtils";
+import { min } from "date-fns";
 
 const Search = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { errorToast, successToast } = useToast();
-  
+
   // State for min date and time
   const [minDate, setMinDate] = useState('');
   const [minTime, setMinTime] = useState('');
-  
+
   // Initialize form with values from location state or sessionStorage
   const [form, setForm] = useState(() => {
     if (location.state?.searchParams) {
       return location.state.searchParams;
     }
+
     const savedForm = sessionStorage.getItem('searchForm');
-    return savedForm ? JSON.parse(savedForm) : {
+    const minDate = new Intl.DateTimeFormat('en-CA').format(new Date());
+
+    if (savedForm) {
+      const parsedForm = JSON.parse(savedForm);
+      if (parsedForm.date < minDate) {
+        parsedForm.date = minDate;
+      }
+      return parsedForm;
+    }
+
+    return {
       from: "",
       to: "",
       date: "",
       time: "",
     };
   });
+
 
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -88,7 +101,6 @@ const Search = () => {
     }
   };
 
-  // Effect to handle success message and auto-search
   useEffect(() => {
     if (location.state?.success) {
       setMessage({
@@ -182,75 +194,73 @@ const Search = () => {
     navigate('/detail', { state: tripWithDate });
   };
 
-  // Robust flattening and filtering for bus objects
   const renderRoutes = () => {
-  if (!routes || routes.length === 0) {
-    return null;
-  }
+    if (!routes || routes.length === 0) {
+      return null;
+    }
 
-  try {
-    return (
-      <div className="mt-12 space-y-6">
-        {routes.map((routeSet, routeIndex) => {
-          const busObjects = Array.isArray(routeSet)
-            ? routeSet.filter(obj => obj && typeof obj === 'object' && obj.bus_id)
-            : [];
+    try {
+      return (
+        <div className="mt-12 space-y-6">
+          {routes.map((routeSet, routeIndex) => {
+            const busObjects = Array.isArray(routeSet)
+              ? routeSet.filter(obj => obj && typeof obj === 'object' && obj.bus_id)
+              : [];
 
-          if (busObjects.length === 0) return null;
+            if (busObjects.length === 0) return null;
 
-          return (
-            <div
-              key={routeIndex}
-              className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4"
-            >
-              <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                Route {routeIndex + 1}
-              </h3>
-              {busObjects.map((bus, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between border border-neutral-300 dark:border-neutral-800 p-4 rounded-md bg-neutral-50 dark:bg-neutral-800/50 space-y-3 md:space-y-0"
-                >
-                  <div className="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
-                    <p>
-                      🚌 <strong>{toUpperCaseLettersOnly(bus.bus_id)}</strong> -{" "}
-                      <span className="capitalize">{capitalize(bus.from)}</span> →{" "}
-                      <span className="capitalize">{capitalize(bus.to)}</span>
-                    </p>
-                    <p>
-                      Departure: <span className="font-medium">{bus.departure}</span> | Arrival:{" "}
-                      <span className="font-medium">{bus.arrival}</span>
-                    </p>
-                    <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
+            return (
+              <div
+                key={routeIndex}
+                className="bg-neutral-100 dark:bg-neutral-900/40 rounded-md p-6 shadow-md space-y-4"
+              >
+                <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+                  Route {routeIndex + 1}
+                </h3>
+                {busObjects.map((bus, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col md:flex-row md:items-center md:justify-between border border-neutral-300 dark:border-neutral-800 p-4 rounded-md bg-neutral-50 dark:bg-neutral-800/50 space-y-3 md:space-y-0"
+                  >
+                    <div className="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
+                      <p>
+                        🚌 <strong>{toUpperCaseLettersOnly(bus.bus_id)}</strong> -{" "}
+                        <span className="capitalize">{capitalize(bus.from)}</span> →{" "}
+                        <span className="capitalize">{capitalize(bus.to)}</span>
+                      </p>
+                      <p>
+                        Departure: <span className="font-medium">{bus.departure}</span> | Arrival:{" "}
+                        <span className="font-medium">{bus.arrival}</span>
+                      </p>
+                      <p>Available Seats: {bus.availableSeats} | Bus Fare: Rs. {bus.fare}</p>
+                    </div>
+                    <div>
+                      <button
+                        className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
+                        onClick={() => handleBooking(bus)}
+                      >
+                        Book Now
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <button
-                      className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors text-sm"
-                      onClick={() => handleBooking(bus)}
-                    >
-                      Book Now
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-    );
-  } catch (error) {
-    console.error("Error rendering routes:", error);
-    return (
-      <div className="mt-12 p-6 bg-red-100 text-red-700 rounded-md">
-        <p>There was an error displaying the routes. Please try searching again.</p>
-      </div>
-    );
-  }
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      );
+    } catch (error) {
+      console.error("Error rendering routes:", error);
+      return (
+        <div className="mt-12 p-6 bg-red-100 text-red-700 rounded-md">
+          <p>There was an error displaying the routes. Please try searching again.</p>
+        </div>
+      );
+    }
   };
 
   return (
     <div className="w-full lg:px-28 md:px-16 sm:px-7 px-4 my-[8ch]">
-      {/* Success/Error Message */}
       {message && (
         <div className="mb-6 rounded-lg shadow-md overflow-hidden">
           <div className={`p-4 flex items-center ${message.type === 'success' ? 'bg-violet-600' : 'bg-red-500'} text-white`}>
@@ -289,8 +299,8 @@ const Search = () => {
             >
               <option value="">Select location</option>
               {locations.map(location => (
-                <option 
-                  key={location.value} 
+                <option
+                  key={location.value}
                   value={location.value}
                   disabled={location.value === form.to}
                 >
@@ -313,8 +323,8 @@ const Search = () => {
             >
               <option value="">Select location</option>
               {locations.map(location => (
-                <option 
-                  key={location.value} 
+                <option
+                  key={location.value}
                   value={location.value}
                   disabled={location.value === form.from}
                 >
@@ -374,7 +384,7 @@ const Search = () => {
         </div>
       </div>
 
-      {/* Render routes with error handling */}
+      {/* Render routes */}
       {renderRoutes()}
     </div>
   );

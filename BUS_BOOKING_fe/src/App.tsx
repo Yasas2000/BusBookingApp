@@ -18,32 +18,32 @@ function App() {
   return (
     <BrowserRouter>
 
-        <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-300 flex flex-col overflow-hidden">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-800 dark:text-neutral-300 flex flex-col overflow-hidden">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              {/* Protected routes */}
-              <Route element={<AuthGuard />}>
-                <Route path="profile" element={<div>Profile Page</div>} />
-                <Route path="details/checkout" element={<Checkout />} />
-                <Route path="payment/success" element={<Success />} />
-                <Route path="detail" element={<Details />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="booking" element={<UserBookings />} />
-                <Route path="bus-routes" element={<BusRoutes />} />
-                <Route path="/operator/seats" element={<SeatLayoutView />} />
-              </Route>
-
-              {/* Unprotected routes */}
-              <Route path="dashboard" element={<HomeContainer />} />
-              <Route path="search" element={<Search />} />
-              <Route path="bus-register" element={<RegisterBusOperator />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            {/* Protected routes */}
+            <Route element={<AuthGuard />}>
+              <Route path="profile" element={<div>Profile Page</div>} />
+              <Route path="details/checkout" element={<Checkout />} />
+              <Route path="payment/success" element={<Success />} />
+              <Route path="detail" element={<Details />} />
+              <Route path="cart" element={<Cart />} />
+              <Route path="booking" element={<UserBookings />} />
+              <Route path="bus-routes" element={<BusRoutes />} />
+              <Route path="/operator/seats" element={<SeatLayoutView />} />
             </Route>
-          </Routes>
-        </div>
+
+            {/* Unprotected routes */}
+            <Route path="dashboard" element={<HomeContainer />} />
+            <Route path="search" element={<Search />} />
+            <Route path="bus-register" element={<RegisterBusOperator />} />
+          </Route>
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
