@@ -2,24 +2,28 @@
 
 BusEase is a modern web-based platform designed to simplify and digitize the process of highway bus booking. It allows users to search for available routes, check real-time seat availability, book tickets, and make secure online payments. The system also provides an admin panel for bus operators to manage routes, buses, schedules, and bookings.
 
-  User Side
-•	Route search by source, destination, and date
-•	Multileg Search results (Give all posiible options between 2 points).
-•	Real-time seat availability 
-•	Interactive seat selection UI
-•	Secure online payment (Stripe)
-•	Booking history dashboard
- Admin Side
-•	Admin login & role-based access
-•	Route, bus, and schedule management
-•	Booking analytics and passenger lists
-•	Seat layout configuration per bus
-Tech Stack
-•	Frontend  - React.js, Axios, CSS, Redux, Tailwind CSS      
-•	Backend    - Node.js, Express.js       
-•	Database   - MongoDB + Mongoose        
-•	Payments   - Stripe API                
-•	Hosting    - Vercel (Frontend, Backend), MongoDB Atlas (DB) 
+ ### User Side
+  
+-	Route search by source, destination, and date.
+-	Multileg Search results (Give all posiible options between 2 points).
+-	Real-time seat availability.
+-	Interactive seat selection UI.
+-	Secure online payment (Stripe).
+-	Booking history dashboard.
+
+ ### Admin Side
+-	Admin login & role-based access
+-	Route, bus, and schedule management
+-	Booking analytics and passenger lists
+-	Seat layout configuration per bus
+
+ ### Tech Stack
+
+-	Frontend  - React.js, Axios, CSS, Redux, Tailwind CSS      
+-	Backend    - Node.js, Express.js       
+-	Database   - MongoDB + Mongoose        
+-	Payments   - Stripe API                
+-	Hosting    - Vercel (Frontend, Backend), MongoDB Atlas (DB) 
 
  1. Clone the Repository
 ```bash
