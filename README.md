@@ -77,9 +77,5 @@ Security & Validation
 •	SMS  notifications
 •	Multilingual UI
 •	AI-based route suggestions
-Author
-Horagala Piyumani (10908162)
-NSBM Green University
-Final Year Individual Project 
-Supervisor: Dr. Shafraz 
+
 
