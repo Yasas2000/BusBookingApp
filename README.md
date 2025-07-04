@@ -109,3 +109,10 @@ Security & Validation
 •	SMS  notifications
 •	Multilingual UI
 •	AI-based route suggestions
+
+All Rights Reserved
+#Owner
+Maleesha Piyumani
+Faculty of Computing
+University of Plymouth
+maleeshapiyumani@gmail.com
